@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>localDB</title>
+  </head>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .form input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .btn {
+      background-color: #3491f5;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn-primary {
+      background-color: #fef173;
+      color: #333;
+    }
+
+    .btn:hover {
+      background-color: #ffe603;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 20px 0;
+    }
+
+    ul.use {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    ul.use li {
+      background: #9fc9f5;
+      color: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    #signup-tab,
+    #login-tab {
+      margin-right: 10px;
+    }
+
+    .active {
+      background-color: #fef173;
+    }
+
+    .w-100 {
+      width: 100%;
+    }
+  </style>
+
+  <body>
+    <hr />
+    <!-- Tabs for Signup and Login -->
+    <div class="tab-container">
+      <button id="signup-tab" class="btn btn-primary">註冊</button>
+      <button id="login-tab" class="btn btn-primary">登入</button>
+    </div>
+    <div id="form-container">
+      <!-- Signup Form -->
+      <form id="signup-form" class="form">
+        <h2>註冊</h2>
+        <input type="email" id="signup-email" placeholder="電子郵件" required />
+        <input type="text" id="signup-username" placeholder="用戶名" required />
+        <input type="password" id="signup-password" placeholder="密碼" required />
+        <button type="submit" class="btn w-100">註冊</button>
+      </form>
+      <!-- Login Form -->
+      <form id="login-form" class="form" style="display: none">
+        <h2>登入<span id="login-name" style="float: right"></span></h2>
+        <span id="login-exp" style="color: red"></span>
+        <input type="email" id="login-email" placeholder="電子郵件" required />
+        <input type="password" id="login-password" placeholder="密碼" required />
+        <button type="submit" class="btn w-100">登入</button>
+      </form>
+    </div>
+    <ul class="use"></ul>
+    <hr />
+    <!-- Create Form -->
+    <form id="create-form" class="form">
+      <h2>Create User</h2>
+      <input type="text" id="create-name" placeholder="Name" required />
+      <input type="number" id="create-age" placeholder="Age" required />
+      <button type="submit" class="btn">Create User</button>
+    </form>
+    <hr />
+    <!-- Update Form -->
+    <form id="update-form" class="form">
+      <h2>Update User</h2>
+      <input type="text" id="update-id" placeholder="User ID" required />
+      <input type="text" id="update-name" placeholder="New Name" />
+      <input type="number" id="update-age" placeholder="New Age" />
+      <button type="submit" class="btn">Update User</button>
+    </form>
+    <hr />
+    <!-- Delete Form -->
+    <form id="delete-form" class="form">
+      <h2>Delete User</h2>
+      <input type="text" id="delete-id" placeholder="User ID" required />
+      <button type="submit" class="btn">Delete User</button>
+    </form>
+  </body>
+  <script type="module" src="./js/index.js"></script>
+</html>
