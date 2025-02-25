@@ -9,6 +9,7 @@
     "build": "echo 'No build step needed'",
     "start:dev": "cross-env NODE_ENV=dev nodemon api/index.js",
     "start:test": "cross-env NODE_ENV=test nodemon api/index.js",
+    "postinstall": "npm rebuild bcrypt --build-from-source",
     "test:watch": "jest --watchAll"
   },
   "keywords": [],
