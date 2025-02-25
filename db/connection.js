@@ -33,6 +33,9 @@ import chalk from 'chalk';
 let isEventRegistered = false;  // 確保事件處理器只註冊一次
 const connectDB = async (dbURI, database) => {
   const fullDBURI = `${dbURI}${database}`;
+
+  console.log('fullDBURI', fullDBURI);
+
   if (process.env.NODE_ENV === 'dev') {
     console.log(`------`);
     console.log(`DB : connection.js`);

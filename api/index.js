@@ -140,7 +140,9 @@ const mongoURIs = {
   // api: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
   // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
   // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
-  api: 'mongodb+srv://ooopp42:Bg7C5xVHea93bVBB@cluster0.ln162.mongodb.net/',
+
+  api: 'mongodb+srv://ooopp42:aA0DRkKMarZRLPX2@cluster0.jztfx.mongodb.net/',
+  // api: 'mongodb+srv://ooopp42:2KLHYU1wcbBXAmh5@cluster0.ln162.mongodb.net/',
   api2: 'mongodb+srv://ooopp42:J35SWH3IiMZ1kLtW@cluster0.ncgfx.mongodb.net/',
   api3: 'mongodb+srv://ooopp42:9qLYSDij6gqZXG2h@cluster0.wzx9l.mongodb.net/',
 }
@@ -149,7 +151,7 @@ const defaultDatabases = {
   // case 'api': dbName = 'prodDB';
   // case 'api2':dbName = 'devDB';
   // case 'api3':dbName = 'testDB';
-  api: 'Nuxt3-test',
+  api: 'freyja',
   api2: 'Nuxt3-test',
   api3: 'Nuxt3-test',
 }
