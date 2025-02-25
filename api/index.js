@@ -141,16 +141,21 @@ const mongoURIs = {
   // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
   // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
 
-  // api: 'mongodb+srv://ooopp42:aA0DRkKMarZRLPX2@cluster0.jztfx.mongodb.net/',
+  // api: 'mongodb://127.0.0.1:27017/',
+  // api2: 'mongodb://127.0.0.1:27017/',
+  // api3: 'mongodb://127.0.0.1:27017/',
+
   api: 'mongodb+srv://ooopp42:2KLHYU1wcbBXAmh5@cluster0.ln162.mongodb.net/',
   api2: 'mongodb+srv://ooopp42:J35SWH3IiMZ1kLtW@cluster0.ncgfx.mongodb.net/',
   api3: 'mongodb+srv://ooopp42:9qLYSDij6gqZXG2h@cluster0.wzx9l.mongodb.net/',
 }
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
-  // case 'api': dbName = 'prodDB';
-  // case 'api2':dbName = 'devDB';
-  // case 'api3':dbName = 'testDB';
+
+  // api: 'prodDB',
+  // api2: 'devDB',
+  // api3: 'testDB',
+
   api: 'nuxt3-test',
   api2: 'nuxt3-test',
   api3: 'nuxt3-test',
