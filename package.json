@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "cross-env NODE_ENV=dev nodemon api/index.js",
+    "start": "cross-env NODE_ENV=production nodemon api/index.js",
     "build": "echo 'No build step needed'",
-    "start:prod": "cross-env NODE_ENV=production nodemon api/index.js",
+    "start:dev": "cross-env NODE_ENV=dev nodemon api/index.js",
     "start:test": "cross-env NODE_ENV=test nodemon api/index.js",
     "test:watch": "jest --watchAll"
   },
