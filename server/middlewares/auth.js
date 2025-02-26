@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt' // 密碼加密
+import bcrypt from 'bcryptjs' // 密碼加密
 import { v4 as uuidv4 } from 'uuid'
 // 用於存儲 token 及其有效期
 const tokens = {}

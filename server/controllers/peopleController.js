@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt' // 密碼加密
+import bcrypt from 'bcryptjs' // 密碼加密
 import { getDBPeople, postDBPeople } from '../../db/index.js';
 import { utilSendErrorResponse } from '../middlewares/auth.js'
 

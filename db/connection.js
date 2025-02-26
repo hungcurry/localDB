@@ -10,7 +10,8 @@ const connectDB = async (dbURI, database) => {
     const currentDB = mongoose.connection.db?.databaseName || '未知';
 
     // 檢查是否需要切換資料庫
-    const needsNewConnection = mongoose.connection.readyState === 0 || currentDB !== database;
+    // const needsNewConnection = mongoose.connection.readyState === 0 || currentDB !== database;
+    const needsNewConnection = mongoose.connection.readyState === 0 || currentDB !== database || mongoose.connection.host !== dbURI;
 
     if (process.env.NODE_ENV === 'dev') {
       console.log(chalk.cyan('------'));
