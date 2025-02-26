@@ -154,42 +154,42 @@ const fetchCheckToken = async () => {
 // ... Users ...
 // ===================
 // !Get user 第一種 取資料GET
-// const fetchUsers = async () => {
-//   // http://localhost:3000/api/users   => prodDB
-//   // http://localhost:3000/api2/users  => devDB
-//   // http://localhost:3000/api3/users  => testDB
-//   const response = await fetch('http://localhost:3000/api2/users' , {
-//     method: 'GET',
-//     headers: {
-//       // 'Authorization': 'Bearer your_token_here', // 發送授權令
-//       'X-Client-From': 'localDB',   // 自定義標頭，指定客戶端來源
-//       // 'X-Client-Language': 'zh-TW',   // 自定義標頭，指定客戶端語言
-//     },
-//   });
-//   const users = await response.json();
-//   await handlerRender(users);
-// }
-
-// !Get user 第二種 取資料POST
 const fetchUsers = async () => {
   // http://localhost:3000/api/users   => prodDB
   // http://localhost:3000/api2/users  => devDB
   // http://localhost:3000/api3/users  => testDB
-  const queryData = {
-    database: 'prodDB',
-    collection: 'AdminUserData',
-  }
-  const response = await fetch('http://localhost:3000/api/users/get-users?room=555', {
-    method: 'POST',
+  const response = await fetch('https://localdb-1w4g.onrender.com/api/users' , {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      'X-Client-From': 'localDB', // 自定義標頭，指定客戶端來源
+      // 'Authorization': 'Bearer your_token_here', // 發送授權令
+      'X-Client-From': 'localDB',   // 自定義標頭，指定客戶端來源
+      // 'X-Client-Language': 'zh-TW',   // 自定義標頭，指定客戶端語言
     },
-    body: JSON.stringify(queryData),
-  })
-  const users = await response.json()
-  await handlerRender(users)
+  });
+  const users = await response.json();
+  await handlerRender(users);
 }
+
+// !Get user 第二種 取資料POST
+// const fetchUsers = async () => {
+//   // http://localhost:3000/api/users   => prodDB
+//   // http://localhost:3000/api2/users  => devDB
+//   // http://localhost:3000/api3/users  => testDB
+//   const queryData = {
+//     database: 'prodDB',
+//     collection: 'AdminUserData',
+//   }
+//   const response = await fetch('http://localhost:3000/api/users/get-users?room=555', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-Client-From': 'localDB', // 自定義標頭，指定客戶端來源
+//     },
+//     body: JSON.stringify(queryData),
+//   })
+//   const users = await response.json()
+//   await handlerRender(users)
+// }
 const handlerRender = (users) => {
   console.log('res', users)
   let html = ''
@@ -293,24 +293,24 @@ loginTab.addEventListener('click', () => {
 const handlerInit = async () => {
   // await fetchToken()
   // await fetchCheckToken()
-  // fetchUsers();
+  fetchUsers();
 
   // 確保頁面加載時預設顯示註冊表單
-  signupTab.click()
+  // signupTab.click()
 
-  // 計時器 檢查 token 是否變化
-  await fetchCheckJwtToken()
-  const timer = setInterval(() => {
-    const token2 = localStorage.getItem('JWT-token'); // 取得最新的 token
-    // console.log('token', token)
-    // console.log('token2', token2)
-    if (token !== token2) {
-      console.log('Token 不一樣，重新加載頁面');
-      clearInterval(timer); // 停止計時器，避免多次重新加載
-      window.location.reload();
-      // 跳轉首頁
-      // window.location.href = "/";
-    }
-  }, 5000); 
+  // // 計時器 檢查 token 是否變化
+  // await fetchCheckJwtToken()
+  // const timer = setInterval(() => {
+  //   const token2 = localStorage.getItem('JWT-token'); // 取得最新的 token
+  //   // console.log('token', token)
+  //   // console.log('token2', token2)
+  //   if (token !== token2) {
+  //     console.log('Token 不一樣，重新加載頁面');
+  //     clearInterval(timer); // 停止計時器，避免多次重新加載
+  //     window.location.reload();
+  //     // 跳轉首頁
+  //     // window.location.href = "/";
+  //   }
+  // }, 5000); 
 }
 handlerInit()

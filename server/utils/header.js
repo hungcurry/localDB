@@ -11,19 +11,53 @@
 // });
 
 
-// 將所有 CORS 配置（例如允許的來源、方法和標頭）集中在一個文件中
-const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Client-From, X-Client-Language, Content-Length, X-Requested-With';
-const ALLOWED_METHODS = 'GET, POST, PUT, DELETE, PATCH, OPTIONS';
-// 允許的來源，可以根據環境變數設定
-// console.log(`process.env.NODE_ENV`, process.env.NODE_ENV);
-const ALLOWED_ORIGIN = process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:8080' : '*';
-
-
-// 設定 CORS 標頭
-const headers = {
-  'Access-Control-Allow-Headers': ALLOWED_HEADERS,
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Methods': ALLOWED_METHODS,
+// CORS 配置常數
+const CORS_CONFIG = {
+  HEADERS: [
+    'Content-Type',
+    'Authorization', 
+    'X-Client-From',
+    'X-Client-Language',
+    'Content-Length',
+    'X-Requested-With'
+  ],
+  METHODS: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  ORIGINS: {
+    dev: '*',  // 支援 NODE_ENV=dev
+    development: '*',  // 支援 NODE_ENV=development
+    production: [
+      'http://127.0.0.1:8080',
+      'http://localhost:3000', 
+      'http://localhost:5173',
+      'http://localhost:8080',
+      'https://local-db.vercel.app',
+      'https://localdb-1w4g.onrender.com'
+    ]
+  }
 };
 
+// 根據請求來源返回允許的 CORS 設定
+const getAllowedOrigin = (origin) => {
+  const env = process.env.NODE_ENV || 'development';
+
+  // 開發環境 (`dev` 或 `development`) 允許所有請求
+  if (env === 'dev' || env === 'development') {
+    return '*';
+  }
+
+  // 正式環境檢查請求的 origin
+  return CORS_CONFIG.ORIGINS.production.includes(origin) ? origin : 'http://127.0.0.1:8080';
+};
+
+// 設定 CORS 標頭
+const headers = (req) => ({
+  'Access-Control-Allow-Headers': CORS_CONFIG.HEADERS.join(', '),
+  'Access-Control-Allow-Origin': getAllowedOrigin(req.headers.origin),
+  'Access-Control-Allow-Methods': CORS_CONFIG.METHODS.join(', '),
+  'Access-Control-Allow-Credentials': 'true',
+});
+
 export default headers;
+
+
+
