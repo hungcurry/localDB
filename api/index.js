@@ -40,24 +40,41 @@ if (process.env.NODE_ENV === 'dev') {
   // console.log('API 路徑:', process.env.VITE_API);
   // console.log('Base URL:', process.env.VITE_BASE_URL);
   console.log('MONGO_ENV:', process.env.MONGO_ENV)
-  console.log('MONGO_URI:', process.env.MONGO_URI)
+  console.log('MONGO_URI:', process.env.MONGO_URI_DEV)
   // http://localhost:3000/api/users
   // http://localhost:3000/api-docs  查看生成的 API 文檔
   console.log(`Server running on http://localhost:${post}`)
 }
+
 // ===================
 // ... CORS配置 ...
 // ===================
 const app = express()
-app.use((req, res, next) => {
-  res.set(headers)
-  next()
-})
-// 自動解析 JSON 格式的請求體
+// CORS 中間件
+const corsMiddleware = (req, res, next) => {
+  const origin = req.headers.origin
+  const env = process.env.NODE_ENV || 'development'
+  const corsHeaders = headers(req)
+  
+  res.set(corsHeaders)
+
+  // 開發環境或合法來源直接放行
+  if (env === 'dev' || env === 'development' || !origin || corsHeaders['Access-Control-Allow-Origin'] === origin) {
+    return next()
+  }
+
+  // 非法來源回傳 403
+  res.status(403).json({
+    status: 'error',
+    message: '無效的來源請求 (CORS policy violation)'
+  })
+}
+// 註冊中間件
+app.use(corsMiddleware)
 app.use(express.json())
-// 處理 OPTIONS 請求以支持 CORS 預檢請求
+// 處理 CORS 預檢請求
 app.options('*', (req, res) => {
-  res.set(headers)
+  res.set(headers(req))
   res.sendStatus(204)
 })
 
@@ -135,18 +152,21 @@ app.use(express.static(publicPath))
 
 // ======== MongoDB 連接 ===========
 // 根據請求的 URL 動態連接到對應的資料庫
+const allowedOrigins = process.env.MONGO_URI ? process.env.MONGO_URI.split(",") : [];
+console.log('allowedOrigins:', allowedOrigins)
+
 const mongoURIs = {
   // 如果是用專案開環境 不同環境的對應 不同 MongoDB URI 前綴
-  // api: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
-  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
-  // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
   // api: 'mongodb://127.0.0.1:27017/',
   // api2: 'mongodb://127.0.0.1:27017/',
   // api3: 'mongodb://127.0.0.1:27017/',
 
-  api: 'mongodb+srv://ooopp42:2KLHYU1wcbBXAmh5@cluster0.ln162.mongodb.net/',
-  api2: 'mongodb+srv://ooopp42:J35SWH3IiMZ1kLtW@cluster0.ncgfx.mongodb.net/',
-  api3: 'mongodb+srv://ooopp42:9qLYSDij6gqZXG2h@cluster0.wzx9l.mongodb.net/',
+  // api: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
+  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
+  // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
+  api: process.env.MONGO_URI_DEV,
+  api2: process.env.MONGO_URI_DEV,
+  api3: process.env.MONGO_URI_DEV,
 }
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
