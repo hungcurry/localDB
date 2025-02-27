@@ -164,9 +164,9 @@ const mongoURIs = {
   // api: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
   // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
   // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
-  api: process.env.MONGO_URI_DEV,
+  api: process.env.MONGO_URI_PROD,
   api2: process.env.MONGO_URI_DEV,
-  api3: process.env.MONGO_URI_DEV,
+  api3: process.env.MONGO_URI_TEST,
 }
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
