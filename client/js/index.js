@@ -158,7 +158,7 @@ const fetchUsers = async () => {
   // http://localhost:3000/api/users   => prodDB
   // http://localhost:3000/api2/users  => devDB
   // http://localhost:3000/api3/users  => testDB
-  const response = await fetch('http://localhost:3000/api/users' , {
+  const response = await fetch('https://localdb-1w4g.onrender.com/api3/users' , {
     method: 'GET',
     headers: {
       // 'Authorization': 'Bearer your_token_here', // 發送授權令
