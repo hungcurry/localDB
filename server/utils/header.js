@@ -28,7 +28,7 @@ const CORS_CONFIG = {
     'http://localhost:3000', 
     'http://localhost:5173',
     'http://localhost:8080',
-    'https://localdb-1w4g.onrender.com'
+    'https://vue-env.vercel.app'
   ]
 };
 // 根據環境和請求來源返回允許的 CORS 設定
