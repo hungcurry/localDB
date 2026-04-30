@@ -76,7 +76,8 @@ const handlePostPerson = async (req, res, next) => {
 
     req.newUser = newUser;  // 將新用戶資料傳遞到後續中間件
     next();  // 繼續執行下一個中間件
-  } catch (error) {
+  } 
+  catch (error) {
     next(error);  
   }
 };

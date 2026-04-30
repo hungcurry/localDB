@@ -16,6 +16,16 @@ const loginExp = document.getElementById('login-exp')
 // ... Token ...
 // ===================
 let token = ''
+// http://localhost:3000/api/users   => prodDB
+// http://localhost:3000/api2/users  => devDB
+// http://localhost:3000/api3/users  => testDB
+
+let URL = 'https://local-db.vercel.app/api2'
+// * 註冊帳號 ( 開發環境 )
+// ooopp42@gmail.com
+// curry
+// 1234
+//------------------------
 // Get JwtToken
 const handleSignup = async (e) => {
   e.preventDefault()
@@ -24,7 +34,7 @@ const handleSignup = async (e) => {
   const password = document.getElementById('signup-password').value
 
   try {
-    const response = await fetch('http://localhost:3000/api/token/signup', {
+    const response = await fetch(`${URL}/token/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,11 +46,13 @@ const handleSignup = async (e) => {
       const data = await response.json()
       console.log('註冊成功！', data)
       signupForm.reset()
-    } else {
+    } 
+    else {
       const errorData = await response.json()
       console.log(`註冊失敗：${errorData.message}`)
     }
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('註冊錯誤：', error)
     console.log('註冊過程中發生錯誤，請稍後再試。')
   }
@@ -51,7 +63,7 @@ const handleLogin = async (e) => {
   const password = document.getElementById('login-password').value
 
   try {
-    const response = await fetch('http://localhost:3000/api/token/login', {
+    const response = await fetch(`${URL}/token/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,7 +82,8 @@ const handleLogin = async (e) => {
       const errorData = await response.json()
       console.log(`登入失敗：${errorData.message}`)
     }
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('登入錯誤：', error)
     console.log('登入過程中發生錯誤，請稍後再試。')
   }
@@ -80,7 +93,7 @@ const fetchCheckJwtToken = async () => {
   if (!token) token = null; // 如果 token 是空的
 
   try {
-    const response = await fetch('http://localhost:3000/api/token/profile', {
+    const response = await fetch(`${URL}/token/profile`, {
       method: 'GET',
       headers: {
         Authorization: `${token}`,
@@ -113,7 +126,7 @@ const fetchCheckJwtToken = async () => {
 
 // Get Token
 const fetchToken = async () => {
-  const response = await fetch('http://localhost:3000/api/token', {
+  const response = await fetch(`${URL}/token`, {
     method: 'GET',
   })
   const responseData = await response.json()
@@ -125,7 +138,7 @@ const fetchCheckToken = async () => {
   const token = localStorage.getItem('DB-token')
   try {
     console.log(`local-token`, token)
-    const response = await fetch('http://localhost:3000/api/token/validate', {
+    const response = await fetch(`${URL}/token/validate`, {
       method: 'GET',
       headers: {
         Authorization: `${token}`,
@@ -145,7 +158,8 @@ const fetchCheckToken = async () => {
     const data = await response.json()
     console.log('API 回應資料:', data)
     console.log('--------')
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('API 請求錯誤:', error)
   }
 }
@@ -158,7 +172,7 @@ const fetchUsers = async () => {
   // http://localhost:3000/api/users   => prodDB
   // http://localhost:3000/api2/users  => devDB
   // http://localhost:3000/api3/users  => testDB
-  const response = await fetch('https://localdb-1w4g.onrender.com/api3/users' , {
+  const response = await fetch(`${URL}/users` , {
     method: 'GET',
     headers: {
       // 'Authorization': 'Bearer your_token_here', // 發送授權令
@@ -209,7 +223,7 @@ const createUser = async (userData) => {
   // const token = localStorage.getItem('DB-token');
   const token = localStorage.getItem('JWT-token')
   // userData = {name: 'Curry', age: '30'}
-  const response = await fetch('http://localhost:3000/api/users', {
+  const response = await fetch(`${URL}/users`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -225,7 +239,7 @@ const createUser = async (userData) => {
 // Update user
 const updateUser = async (userId, updateData) => {
   const token = localStorage.getItem('JWT-token')
-  const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+  const response = await fetch(`${URL}/users/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -241,7 +255,7 @@ const updateUser = async (userId, updateData) => {
 // Delete user
 const deleteUser = async (userId) => {
   const token = localStorage.getItem('JWT-token')
-  const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+  const response = await fetch(`${URL}/users/${userId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `${token}`,
