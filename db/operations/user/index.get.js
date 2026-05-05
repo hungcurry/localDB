@@ -21,18 +21,23 @@ const getDBUsers = async () => {
     // const users = await UserModel.find({ _id: 'invalid_id' });
 
     const users = await aggregateUsers();
+
     if (process.env.NODE_ENV === 'dev') {
       console.log('MongoDB');
     }
-    if (users.length > 0) {
-      console.log('DB Users found:', users);
-    }else {
-      throw new Error('DB No users found'); 
+
+    if (users.length === 0) {
+      console.log('DB 沒有 users 資料');
+      return []; // ✅ 正常回傳
     }
+
+    console.log('DB Users found:', users);
     return users;
-  } catch (err) {
+
+  } 
+  catch (err) {
     console.error('Error finding users:', err);
-    throw err;
+    throw err; // 只有真正錯誤才丟
   }
 };
 
