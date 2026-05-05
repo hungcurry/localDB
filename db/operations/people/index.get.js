@@ -13,19 +13,23 @@ const aggregatePeople = async () => {
 const getDBPeople = async () => {
   try {
     const people = await aggregatePeople();
+
     if (process.env.NODE_ENV === 'dev') {
       console.log('MongoDB');
     }
-    if (people.length > 0) {
-      console.log('DB 註冊帳號People:', people);
-    } else {
-      throw new Error('DB No people found'); 
+
+    if (people.length === 0) {
+      console.log('DB 沒有資料');
+      return []; // ✅ 回傳空陣列
     }
+
+    console.log('DB 註冊帳號People:', people);
     return people;
-  } catch (err) {
+
+  } 
+  catch (err) {
     console.error('Error finding people:', err);
-    throw err;
+    throw err; // 真的 DB error 才丟
   }
 };
-
 export { getDBPeople };
