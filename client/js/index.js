@@ -16,12 +16,16 @@ const loginExp = document.getElementById('login-exp')
 // ... Token ...
 // ===================
 let token = ''
+// * 正式環境
+let URL = 'https://local-db.vercel.app/api2'
+
+// * 開發環境
+// let URL = 'http://localhost:3000/api2'
+
 // http://localhost:3000/api/users   => prodDB
 // http://localhost:3000/api2/users  => devDB
 // http://localhost:3000/api3/users  => testDB
-
-let URL = 'https://local-db.vercel.app/api2'
-// * 註冊帳號 ( 開發環境 )
+// ~註冊帳號 ( 開發環境 )
 // ooopp42@gmail.com
 // curry
 // 1234
