@@ -180,53 +180,66 @@ const defaultDatabases = {
 const excludedPaths = ['/', 'index', 'api-docs', 'error']
 app.use(async (req, res, next) => {
   try {
-    // /api/users 解析出req api, api2, api3
-    const path = req.originalUrl === '/' ? 'index' : req.originalUrl.split('/')[1]
+    const path =
+      req.originalUrl === '/'
+        ? 'index'
+        : req.originalUrl.split('/')[1]
 
     // 如果請求路徑在排除陣列中，跳過資料庫連接邏輯
     if (excludedPaths.includes(path)) {
       return next()
     }
 
-    const { database, collection } = req.body
+    // ❗ 只在非 GET 才讀 body
+    const { database, collection } =
+      req.method === 'GET'
+        ? {}
+        : req.body || {}
+
+    // dev log
     if (process.env.NODE_ENV === 'dev') {
       const referer = req.headers.referer
-      // 判斷是 server 請求還是 client 請求
-      const isServerRequest = !referer || referer.includes(`localhost:${post}`)
-      if (isServerRequest && path !== 'favicon.ico') {
-        console.log(chalk.yellow(`--- 伺服器請求 ---`))
-        console.log(path)
-        console.log('database =>', database)
-      } else if (typeof referer === 'string' && path !== 'favicon.ico') {
-        console.log(chalk.yellow(`--- 客戶端請求 ---`))
+      const isServerRequest = !referer || referer.includes(`localhost:${process.env.PORT || 3000}`)
+
+      if (path !== 'favicon.ico') {
+        console.log(
+          isServerRequest
+            ? '--- 伺服器請求 ---'
+            : '--- 客戶端請求 ---'
+        )
         console.log(path)
         console.log('database =>', database)
       }
     }
-    let dbURI = ''
-    let defaultDatabase = ''
-    // 根據不同的 path 選擇對應的 MongoDB URI 和預設資料庫
-    if (path === 'api') {
-      dbURI = mongoURIs.api
-      defaultDatabase = defaultDatabases.api
-    } else if (path === 'api2') {
-      dbURI = mongoURIs.api2
-      defaultDatabase = defaultDatabases.api2
-    } else if (path === 'api3') {
-      dbURI = mongoURIs.api3
-      defaultDatabase = defaultDatabases.api3
-    } else {
+
+    // DB mapping
+    const dbMap = {
+      api: mongoURIs.api,
+      api2: mongoURIs.api2,
+      api3: mongoURIs.api3,
+    }
+
+    const defaultDbMap = defaultDatabases
+
+    const dbURI = dbMap[path]
+    const defaultDatabase = defaultDbMap[path]
+
+    if (!dbURI) {
       return res.status(400).send({
         status: 'error',
         statecode: 400,
         message: 'Invalid API path',
       })
     }
-    // mongodb://127.0.0.1:27017/prodDB (Database)
-    // 防止 database 為 undefined 或空字串，使用預設資料庫名稱
-    await connectDB(dbURI, database || defaultDatabase)
+
+    // GET 不強制 database（用 default）
+    const finalDatabase = database || defaultDatabase
+
+    await connectDB(dbURI, finalDatabase)
+
     next()
-  } catch (err) {
+  } 
+  catch (err) {
     console.error('Failed to connect to database:', err)
     res.status(500).json({
       status: 'error',
