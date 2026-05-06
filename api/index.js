@@ -72,9 +72,12 @@ const corsMiddleware = (req, res, next) => {
 }
 // 註冊中間件
 app.use(corsMiddleware)
-app.use(express.json())
-// 處理 CORS 預檢請求
+// 先處理跨域 (最優先)
 app.use(cors())
+// 解析 JSON (如 Axios，設定大小限制，防止惡意攻擊導致記憶體溢位)
+app.use(express.json({ limit: '10mb' }))
+// 解析 Form (如藍新通知)
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // ===================
 // ... 伺服器 ...
