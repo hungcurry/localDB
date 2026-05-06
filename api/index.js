@@ -3,6 +3,7 @@ import express from 'express'
 import chalk from 'chalk'
 import dotenv from 'dotenv'
 import path from 'path'
+import cors from 'cors'
 import cookieParser from 'cookie-parser'; 
 import headers from '../server/utils/header.js'
 import indexRouter from '../server/routes/index.js'
@@ -73,10 +74,7 @@ const corsMiddleware = (req, res, next) => {
 app.use(corsMiddleware)
 app.use(express.json())
 // 處理 CORS 預檢請求
-app.options('*', (req, res) => {
-  res.set(headers(req))
-  res.sendStatus(204)
-})
+app.use(cors())
 
 // ===================
 // ... 伺服器 ...
