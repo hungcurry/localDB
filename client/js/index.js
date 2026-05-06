@@ -314,8 +314,8 @@ loginTab.addEventListener('click', () => {
 
 // init
 const handlerInit = async () => {
-  await fetchToken()
-  await fetchCheckToken()
+  // await fetchToken()
+  // await fetchCheckToken()
   fetchUsers()
 
   // 確保頁面加載時預設顯示註冊表單
