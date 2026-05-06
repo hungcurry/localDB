@@ -166,7 +166,7 @@ const mongoURIs = {
   api2: process.env.MONGO_URI_DEV,
   api3: process.env.MONGO_URI_TEST,
 }
-const defaultDatabases = {
+const defaultDbMap = {
   // 根據不同的 path 選擇對應的 Databases
   // api: 'prodDB',
   // api2: 'devDB',
@@ -180,21 +180,24 @@ const defaultDatabases = {
 const excludedPaths = ['/', 'index', 'api-docs', 'error']
 app.use(async (req, res, next) => {
   try {
-    const path =
-      req.originalUrl === '/'
-        ? 'index'
-        : req.originalUrl.split('/')[1]
-
+    /**
+     * 如果是 /	    'index'
+     * /products   'products'
+     * /order/list  'order'
+     * /api2/users  'api2'
+     */
+    const path = req.originalUrl === '/' ? 'index' : req.originalUrl.split('/')[1]
     // 如果請求路徑在排除陣列中，跳過資料庫連接邏輯
     if (excludedPaths.includes(path)) {
       return next()
     }
 
-    // ❗ 只在非 GET 才讀 body
-    const { database, collection } =
-      req.method === 'GET'
-        ? {}
-        : req.body || {}
+    /**
+     * 如果是 GET：返回一個空物件 {}。因為 GET 請求通常不帶 body，資料應該在 query 中。
+     * 如果不是 GET (例如 POST, PUT, DELETE)：返回 req.body。
+     * 如果 req.body 是 undefined 或 null，則給予一個保底的空物件 {} (透過 || {})。
+     */
+    const { database, collection } = req.method === 'GET' ? {} : req.body || {}
 
     // dev log
     if (process.env.NODE_ENV === 'dev') {
@@ -207,7 +210,7 @@ app.use(async (req, res, next) => {
             ? '--- 伺服器請求 ---'
             : '--- 客戶端請求 ---'
         )
-        console.log(path)
+        console.log(path) // api2
         console.log('database =>', database)
       }
     }
@@ -218,11 +221,10 @@ app.use(async (req, res, next) => {
       api2: mongoURIs.api2,
       api3: mongoURIs.api3,
     }
-
-    const defaultDbMap = defaultDatabases
-
     const dbURI = dbMap[path]
+    // 得到 mongoURIs.api2 (連線到 dev 伺服器)
     const defaultDatabase = defaultDbMap[path]
+    // 透過 defaultDbMap["api2"] 得到 "devDB"。
 
     if (!dbURI) {
       return res.status(400).send({
