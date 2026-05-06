@@ -95,6 +95,12 @@ import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../db/ind
 
 const handleGetUsers = async (req, res, next) => {
   try {
+
+    // ~如果是用 !Get user 第二種 取資料POST 方式的話 
+    // 就會在這裡拿到Collection,然後去 對應的Collection裡面取資料
+    const { targetCollection } = req
+    // ~console.log(`targetCollection:`, targetCollection)
+
     const users = await getDBUsers()
     res.status(200).json({
       status: 'success',

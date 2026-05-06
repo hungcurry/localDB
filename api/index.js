@@ -198,6 +198,8 @@ app.use(async (req, res, next) => {
      * 如果 req.body 是 undefined 或 null，則給予一個保底的空物件 {} (透過 || {})。
      */
     const { database, collection } = req.method === 'GET' ? {} : req.body || {}
+    // 掛載到 req 上，讓後續的 middleware 或 controller 可以使用
+    req.targetCollection = collection;
 
     // dev log
     if (process.env.NODE_ENV === 'dev') {
@@ -212,6 +214,7 @@ app.use(async (req, res, next) => {
         )
         console.log(path) // api2
         console.log('database =>', database)
+        console.log('collection =>', collection)
       }
     }
 
