@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs' // 密碼加密
-import { getDBPeople, postDBPeople } from '../../db/index.js';
+import { getDBPeople, postDBPeople } from '../../db/index.js'
 import { utilSendErrorResponse } from '../middlewares/auth.js'
 
 const handleGetPeople = async (req, res, next) => {
@@ -9,10 +9,11 @@ const handleGetPeople = async (req, res, next) => {
       acc[person.email] = {
         password: person.password,
         username: person.username,
-      };
-      return acc;
-    }, {});
+      }
+      return acc
+    }, {})
 
+    // 原始資料
     // people = [
     //   {
     //     _id: new ObjectId('67061e42995e4b47ce48ad7a'),
@@ -30,16 +31,16 @@ const handleGetPeople = async (req, res, next) => {
     // }
     // console.log(users);
 
-    req.users = users;  // 將用戶資料附加到請求物件上，供後續中間件使用
-    next();  // 繼續執行下一個中間件
+    req.users = users // 將用戶資料附加到請求物件上，供後續中間件使用
+    next() // 繼續執行下一個中間件
   } 
   catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 const handlePostPerson = async (req, res, next) => {
   const users = req.users
-  const { email, username, password } = req.body;
+  const { email, username, password } = req.body
 
   if (!email || !username || !password) {
     return utilSendErrorResponse(res, 400, '錯誤請求：缺少或空的必要欄位')
@@ -69,20 +70,17 @@ const handlePostPerson = async (req, res, next) => {
     //   }
     // }
     // 儲存新用戶資料到資料庫
-    const newUser = await postDBPeople({ email, password: hashPassword, username });
+    const newUser = await postDBPeople({ email, password: hashPassword, username })
     if (!newUser) {
       return utilSendErrorResponse(res, 500, '伺服器錯誤: 無法儲存用戶資料')
     }
 
-    req.newUser = newUser;  // 將新用戶資料傳遞到後續中間件
-    next();  // 繼續執行下一個中間件
+    req.newUser = newUser // 將新用戶資料傳遞到後續中間件
+    next() // 繼續執行下一個中間件
   } 
   catch (error) {
-    next(error);  
+    next(error)
   }
-};
+}
 
-export {
-  handleGetPeople,
-  handlePostPerson,
-};
+export { handleGetPeople, handlePostPerson }

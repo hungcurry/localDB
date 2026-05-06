@@ -36,7 +36,7 @@ switch (process.env.NODE_ENV) {
 dotenv.config({ path: envFile })
 if (process.env.NODE_ENV === 'dev') {
   console.log(`------`)
-  console.log(`Server : index.js`)
+  console.log(`Server : api/index.js`)
   console.log('當前環境:', process.env.NODE_ENV)
   // console.log('API 路徑:', process.env.VITE_API);
   // console.log('Base URL:', process.env.VITE_BASE_URL);
@@ -153,9 +153,6 @@ app.use(express.static(publicPath))
 
 // ======== MongoDB 連接 ===========
 // 根據請求的 URL 動態連接到對應的資料庫
-const allowedOrigins = process.env.MONGO_URI ? process.env.MONGO_URI.split(",") : [];
-console.log('allowedOrigins:', allowedOrigins)
-
 const mongoURIs = {
   // 如果是用專案開環境 不同環境的對應 不同 MongoDB URI 前綴
   // api: 'mongodb://127.0.0.1:27017/',

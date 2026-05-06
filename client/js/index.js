@@ -30,7 +30,7 @@ let URL = 'https://local-db.vercel.app/api2'
 // curry
 // 1234
 //------------------------
-// Get JwtToken
+// Get JwtToken ( Bearer )
 const handleSignup = async (e) => {
   e.preventDefault()
   const email = document.getElementById('signup-email').value
@@ -100,7 +100,8 @@ const fetchCheckJwtToken = async () => {
     const response = await fetch(`${URL}/token/profile`, {
       method: 'GET',
       headers: {
-        Authorization: `${token}`,
+        // 前端送 request 時： + Bearer
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     })
@@ -123,7 +124,8 @@ const fetchCheckJwtToken = async () => {
       console.log('--------')
     }
 
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('API 請求錯誤:', error)
   }
 }
@@ -231,7 +233,8 @@ const createUser = async (userData) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `${token}`,
+      // 前端送 request 時： + Bearer
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(userData),
   })
@@ -247,7 +250,8 @@ const updateUser = async (userId, updateData) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `${token}`,
+      // 前端送 request 時： + Bearer
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(updateData),
   })
@@ -262,7 +266,8 @@ const deleteUser = async (userId) => {
   const response = await fetch(`${URL}/users/${userId}`, {
     method: 'DELETE',
     headers: {
-      Authorization: `${token}`,
+      // 前端送 request 時： + Bearer
+      Authorization: `Bearer ${token}`,
     },
   })
   const result = await response.json()
@@ -309,9 +314,9 @@ loginTab.addEventListener('click', () => {
 
 // init
 const handlerInit = async () => {
-  // await fetchToken()
-  // await fetchCheckToken()
-  fetchUsers();
+  await fetchToken()
+  await fetchCheckToken()
+  fetchUsers()
 
   // 確保頁面加載時預設顯示註冊表單
   // signupTab.click()

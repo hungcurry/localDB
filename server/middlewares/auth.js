@@ -13,7 +13,7 @@ const utilLogRequest = (req) => {
   const clientFrom = req.headers['x-client-from']
   const authHeader = req.headers['authorization']
   console.log(`------`)
-  console.log(`Server : auth.js`)
+  console.log(`Server : mid/auth.js`)
   // 如：http://127.0.0.1:8080/
   // console.log(req.headers);
   // 範例請求req網址: http://localhost:3000/api/users/get-users?room=555
@@ -64,9 +64,7 @@ const utilGenerateToken = (req, res) => {
   const time = utilFormatDate(new Date(expiryTime).toISOString())
   // const tokenData = { token, expiresAt: time};
 
-  // 在這裡添加 Bearer 前綴
-  const bearerToken = `Bearer ${token}`
-  const tokenData = { token: bearerToken, expiresAt: time }
+  const tokenData = { token , expiresAt: time }
 
   res.json({
     status: 'success',
@@ -148,7 +146,7 @@ const checkContentTypeBody = (req, res, next) => {
   next() // 繼續到下一個處理器
 }
 // ===================
-// ... JWT Token ...
+// ... JWT Token ( Bearer ) ...
 // ===================
 // 使用 process.env 取得密鑰
 let envFile
@@ -202,6 +200,7 @@ const checkJWTLogin = async (req, res) => {
   // 生成 JWT token，設定過期時間為 1 小時
   const token = jwt.sign(payload, secretKey, { expiresIn: '1h' })
   //console.log(token)
+  // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
   // 2-4 回應
   res.json({
@@ -212,7 +211,10 @@ const checkJWTLogin = async (req, res) => {
 }
 // 驗證 JWT
 const checkJWTAuthorization = (req, res, next) => {
-  const token = req.headers['authorization']
+  const authHeader = req.headers['authorization']
+  // 從 "Bearer <token>" 中分割提取 token
+  const token = authHeader?.split(' ')[1]
+  console.log(`Received token: ${token}`)
 
   // 3-1 驗證用戶有送token
   if (!token) {
