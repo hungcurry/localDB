@@ -50,8 +50,7 @@ const handleSignup = async (e) => {
       const data = await response.json()
       console.log('註冊成功！', data)
       signupForm.reset()
-    } 
-    else {
+    } else {
       const errorData = await response.json()
       console.log(`註冊失敗：${errorData.message}`)
     }
@@ -94,7 +93,7 @@ const handleLogin = async (e) => {
 }
 const fetchCheckJwtToken = async () => {
   token = localStorage.getItem('JWT-token')
-  if (!token) token = null; // 如果 token 是空的
+  if (!token) token = null // 如果 token 是空的
 
   try {
     const response = await fetch(`${URL}/token/profile`, {
@@ -106,10 +105,10 @@ const fetchCheckJwtToken = async () => {
       },
     })
 
-    if (response.ok){
+    if (response.ok) {
       const data = await response.json()
       console.log('API 回應資料:', data)
-  
+
       // 取出過期時間
       const { email, username, exp, iat } = data.user
       const expDate = new Date(exp * 1000) // 將秒轉換為毫秒
@@ -117,13 +116,12 @@ const fetchCheckJwtToken = async () => {
       const expDateLocal = expDate.toLocaleString()
       loginName.textContent = username
       loginExp.textContent = `過期時間 (exp)：${expDateLocal}`
-  
-      if (data.status === 'success') {
-        fetchUsers()
-      }
-      console.log('--------')
-    }
 
+      // if (data.status === 'success') {
+      //   fetchUsers()
+      // }
+      // console.log('--------')
+    }
   } 
   catch (error) {
     console.error('API 請求錯誤:', error)
@@ -178,16 +176,16 @@ const fetchUsers = async () => {
   // http://localhost:3000/api/users   => prodDB
   // http://localhost:3000/api2/users  => devDB
   // http://localhost:3000/api3/users  => testDB
-  const response = await fetch(`${URL}/users` , {
+  const response = await fetch(`${URL}/users`, {
     method: 'GET',
     headers: {
       // 'Authorization': 'Bearer your_token_here', // 發送授權令
-      'X-Client-From': 'localDB',   // 自定義標頭，指定客戶端來源
+      'X-Client-From': 'localDB', // 自定義標頭，指定客戶端來源
       // 'X-Client-Language': 'zh-TW',   // 自定義標頭，指定客戶端語言
     },
-  });
-  const users = await response.json();
-  await handlerRender(users);
+  })
+  const users = await response.json()
+  await handlerRender(users)
 }
 
 // !Get user 第二種 取資料POST
@@ -334,6 +332,6 @@ const handlerInit = async () => {
   //     // 跳轉首頁
   //     // window.location.href = "/";
   //   }
-  // }, 5000); 
+  // }, 5000);
 }
 handlerInit()

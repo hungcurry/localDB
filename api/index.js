@@ -4,7 +4,7 @@ import chalk from 'chalk'
 import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
-import cookieParser from 'cookie-parser'; 
+import cookieParser from 'cookie-parser'
 import headers from '../server/utils/header.js'
 import indexRouter from '../server/routes/index.js'
 import userRouter from '../server/routes/user.js'
@@ -14,8 +14,8 @@ import errorRouter from '../server/routes/error.js'
 import connectDB from '../db/connection.js'
 import { swaggerDocs, swaggerUi } from '../server/utils/swagger.js'
 import { catchHttpErrors } from '../server/middlewares/errorHandler.js'
-import { parse } from 'url';
-import { createServer } from 'http';
+import { parse } from 'url'
+import { createServer } from 'http'
 import { wss1, wss2 } from '../server/routes/ws.js'
 // #endregion
 
@@ -56,7 +56,7 @@ const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin
   const env = process.env.NODE_ENV || 'development'
   const corsHeaders = headers(req)
-  
+
   res.set(corsHeaders)
 
   // 開發環境或合法來源直接放行
@@ -67,7 +67,7 @@ const corsMiddleware = (req, res, next) => {
   // 非法來源回傳 403
   res.status(403).json({
     status: 'error',
-    message: '無效的來源請求 (CORS policy violation)'
+    message: '無效的來源請求 (CORS policy violation)',
   })
 }
 // 註冊中間件
@@ -86,22 +86,22 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 const server = createServer(app)
 // ~創建 WebSocket 伺服器
 server.on('upgrade', function upgrade(request, socket, head) {
-  const { pathname } = parse(request.url);
+  const { pathname } = parse(request.url)
 
   switch (pathname) {
     case '/ws':
       wss1.handleUpgrade(request, socket, head, function done(ws) {
-        wss1.emit('connection', ws, request);
-      });
-      break;
+        wss1.emit('connection', ws, request)
+      })
+      break
     case '/ws2':
       wss2.handleUpgrade(request, socket, head, function done(ws) {
-        wss2.emit('connection', ws, request);
-      });
-      break;
+        wss2.emit('connection', ws, request)
+      })
+      break
     default:
-      socket.destroy();
-      break;
+      socket.destroy()
+      break
   }
 })
 
@@ -113,13 +113,13 @@ server.on('upgrade', function upgrade(request, socket, head) {
 // pnpm install -D ejs-locals
 import ejsLocals from 'ejs-locals'
 import { fileURLToPath } from 'url'
-import { dirname, join , resolve } from 'path'
+import { dirname, join, resolve } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 // const viewsPath = join(__dirname, 'views')
 const viewsPath = resolve(__dirname, '..', 'server', 'views')
 // view engine setup
-app.engine("ejs", ejsLocals)
+app.engine('ejs', ejsLocals)
 // 讀取 EJS 檔案位置
 app.set('views', viewsPath)
 // 設置模板引擎
@@ -199,7 +199,7 @@ app.use(async (req, res, next) => {
      */
     const { database, collection } = req.method === 'GET' ? {} : req.body || {}
     // 掛載到 req 上，讓後續的 middleware 或 controller 可以使用
-    req.targetCollection = collection;
+    req.targetCollection = collection
 
     // dev log
     if (process.env.NODE_ENV === 'dev') {
@@ -207,11 +207,7 @@ app.use(async (req, res, next) => {
       const isServerRequest = !referer || referer.includes(`localhost:${process.env.PORT || 3000}`)
 
       if (path !== 'favicon.ico') {
-        console.log(
-          isServerRequest
-            ? '--- 伺服器請求 ---'
-            : '--- 客戶端請求 ---'
-        )
+        console.log(isServerRequest ? '--- 伺服器請求 ---' : '--- 客戶端請求 ---')
         console.log(path) // api2
         console.log('database =>', database)
         console.log('collection =>', collection)
@@ -306,11 +302,10 @@ const startServer = () => {
     // *public
     // http://localhost:3000/about.html
     // http://localhost:3000/stylesheets/style.css
-
+    
     // *ejs模板首頁
     // http://localhost:3000
     // console.log(`Server running on http://localhost:${post}`)
   })
 }
 startServer()
-

@@ -22,9 +22,8 @@ const router = express.Router()
 // router.use(checkAuthorization);
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express', VARIABLES });
-});
-
+router.get('/', function (req, res, next) {
+  res.render('index', { title: 'Express', VARIABLES })
+})
 
 export default router

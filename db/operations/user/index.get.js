@@ -1,13 +1,13 @@
-import { UserModel } from '../../models/user.model.js';
+import { UserModel } from '../../models/user.model.js'
 
 // 查詢用戶數據
 const aggregateUsers = async () => {
   return await UserModel.aggregate([
     {
-      $project: { __v: 0 }
-    }
-  ]);
-};
+      $project: { __v: 0 },
+    },
+  ])
+}
 
 // 查詢文檔
 const getDBUsers = async () => {
@@ -20,25 +20,24 @@ const getDBUsers = async () => {
     // 模擬錯誤2 註解打開
     // const users = await UserModel.find({ _id: 'invalid_id' });
 
-    const users = await aggregateUsers();
+    const users = await aggregateUsers()
 
     if (process.env.NODE_ENV === 'dev') {
-      console.log('MongoDB');
+      console.log('MongoDB')
     }
 
     if (users.length === 0) {
-      console.log('DB 沒有 users 資料');
-      return []; // ✅ 正常回傳
+      console.log('DB 沒有 users 資料')
+      return [] // ✅ 正常回傳
     }
 
-    console.log('DB Users found:', users);
-    return users;
-
+    console.log('DB Users found:', users)
+    return users
   } 
   catch (err) {
-    console.error('Error finding users:', err);
-    throw err; // 只有真正錯誤才丟
+    console.error('Error finding users:', err)
+    throw err // 只有真正錯誤才丟
   }
-};
+}
 
-export { getDBUsers };
+export { getDBUsers }

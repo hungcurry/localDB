@@ -1,5 +1,5 @@
-import swaggerJsDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc'
+import swaggerUi from 'swagger-ui-express'
 // ~npm install swagger-jsdoc swagger-ui-express
 const swaggerOptions = {
   swaggerDefinition: {
@@ -11,16 +11,16 @@ const swaggerOptions = {
       contact: {
         name: '技術支援團隊',
         url: 'https://support.example.com',
-        email: 'support@example.com'
-      }
+        email: 'support@example.com',
+      },
     },
     servers: [
       { url: 'http://localhost:3000', description: '本地開發伺服器' },
-      { url: 'https://localdb-1w4g.onrender.com', description: '生產環境伺服器' }
-    ]
+      { url: 'https://localdb-1w4g.onrender.com', description: '生產環境伺服器' },
+    ],
   },
   apis: ['./server/routes/*.js'],
-};
+}
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-export { swaggerDocs, swaggerUi };
+const swaggerDocs = swaggerJsDoc(swaggerOptions)
+export { swaggerDocs, swaggerUi }

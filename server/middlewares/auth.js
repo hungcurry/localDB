@@ -64,7 +64,7 @@ const utilGenerateToken = (req, res) => {
   const time = utilFormatDate(new Date(expiryTime).toISOString())
   // const tokenData = { token, expiresAt: time};
 
-  const tokenData = { token , expiresAt: time }
+  const tokenData = { token, expiresAt: time }
 
   res.json({
     status: 'success',
