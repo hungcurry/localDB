@@ -1,7 +1,7 @@
 // #region import
+import '../server/config/env.js'// 確保第一行加載環境變數
 import express from 'express'
 import chalk from 'chalk'
-import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -20,20 +20,19 @@ import { wss1, wss2 } from '../server/routes/ws.js'
 // #endregion
 
 // 判斷當前環境並加載相應的.env 檔案
-let envFile
+// let envFile
+// switch (process.env.NODE_ENV) {
+//   case 'production':
+//     envFile = '.env.prod'
+//     break
+//   case 'test':
+//     envFile = '.env.test'
+//     break
+//   default:
+//     envFile = '.env.dev'
+//     break
+// }
 const post = 3000
-switch (process.env.NODE_ENV) {
-  case 'production':
-    envFile = '.env.prod'
-    break
-  case 'test':
-    envFile = '.env.test'
-    break
-  default:
-    envFile = '.env.dev'
-    break
-}
-dotenv.config({ path: envFile })
 if (process.env.NODE_ENV === 'dev') {
   console.log(`------`)
   console.log(`Server : api/index.js`)
@@ -187,6 +186,7 @@ app.use(async (req, res, next) => {
      * /api2/users  'api2'
      */
     const path = req.originalUrl === '/' ? 'index' : req.originalUrl.split('/')[1]
+
     // 如果請求路徑在排除陣列中，跳過資料庫連接邏輯
     if (excludedPaths.includes(path)) {
       return next()
@@ -225,13 +225,13 @@ app.use(async (req, res, next) => {
     const defaultDatabase = defaultDbMap[path]
     // 透過 defaultDbMap["api2"] 得到 "devDB"。
 
-    if (!dbURI) {
-      return res.status(400).send({
-        status: 'error',
-        statecode: 400,
-        message: 'Invalid API path',
-      })
-    }
+    // if (!dbURI) {
+    //   return res.status(400).send({
+    //     status: 'error',
+    //     statecode: 400,
+    //     message: 'Invalid API path',
+    //   })
+    // }
 
     // GET 不強制 database（用 default）
     const finalDatabase = database || defaultDatabase
@@ -302,7 +302,7 @@ const startServer = () => {
     // *public
     // http://localhost:3000/about.html
     // http://localhost:3000/stylesheets/style.css
-    
+
     // *ejs模板首頁
     // http://localhost:3000
     // console.log(`Server running on http://localhost:${post}`)
