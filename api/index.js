@@ -19,19 +19,6 @@ import { createServer } from 'http'
 import { wss1, wss2 } from '../server/routes/ws.js'
 // #endregion
 
-// 判斷當前環境並加載相應的.env 檔案
-// let envFile
-// switch (process.env.NODE_ENV) {
-//   case 'production':
-//     envFile = '.env.prod'
-//     break
-//   case 'test':
-//     envFile = '.env.test'
-//     break
-//   default:
-//     envFile = '.env.dev'
-//     break
-// }
 const post = 3000
 if (process.env.NODE_ENV === 'dev') {
   console.log(`------`)
@@ -50,7 +37,6 @@ if (process.env.NODE_ENV === 'dev') {
 // ... CORS配置 ...
 // ===================
 const app = express()
-// CORS 中間件
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin
   const env = process.env.NODE_ENV || 'development'
@@ -69,14 +55,9 @@ const corsMiddleware = (req, res, next) => {
     message: '無效的來源請求 (CORS policy violation)',
   })
 }
-// 註冊中間件
 app.use(corsMiddleware)
 // 先處理跨域 (最優先)
 app.use(cors())
-// 解析 JSON (如 Axios，設定大小限制，防止惡意攻擊導致記憶體溢位)
-app.use(express.json({ limit: '10mb' }))
-// 解析 Form (如藍新通知)
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // ===================
 // ... 伺服器 ...
@@ -140,9 +121,11 @@ app.set('view engine', 'ejs')
 // ===================
 // ... 中間件 ...
 // ===================
-// 解析 URL 編碼的中間件
-app.use(express.urlencoded({ extended: false }))
-// cookie 解析中間件
+// 解析 JSON (如 Axios，設定大小限制，防止惡意攻擊導致記憶體溢位)
+app.use(express.json({ limit: '10mb' }))
+// 解析 Form (如藍新通知)
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+// 解析cookie (如 JWT token 存在 cookie 中，或是前端需要設置 cookie)
 app.use(cookieParser())
 // 靜態文件中間件
 // 靜態文件服務，將 public 資料夾中的文件公開 不透過 express 路由
@@ -175,8 +158,12 @@ const defaultDbMap = {
   api2: 'nuxt3-test',
   api3: 'nuxt3-test',
 }
-// 排除的路徑陣列
-const excludedPaths = ['/', 'index', 'api-docs', 'error']
+// !排除的路徑陣列
+// 這些路徑不需要連接資料庫，直接放行
+// 這邊新增後,下面Router的路徑也要記得加上去
+const excludedPaths = [
+  '/', 'index', 'api-docs', 'error'
+]
 app.use(async (req, res, next) => {
   try {
     /**
@@ -189,8 +176,15 @@ app.use(async (req, res, next) => {
 
     // 如果請求路徑在排除陣列中，跳過資料庫連接邏輯
     if (excludedPaths.includes(path)) {
+      // 如果是 favicon 或 well-known，直接回傳 404 並結束請求
+      // 這樣就不會往下走到你的 "API Not Found" 錯誤處理器
+      if (path === 'favicon.ico' || path === '.well-known' || path === 'robots.txt') {
+        return res.status(404).end()
+      }
+      
       return next()
     }
+
 
     /**
      * 如果是 GET：返回一個空物件 {}。因為 GET 請求通常不帶 body，資料應該在 query 中。
@@ -225,13 +219,12 @@ app.use(async (req, res, next) => {
     const defaultDatabase = defaultDbMap[path]
     // 透過 defaultDbMap["api2"] 得到 "devDB"。
 
-    // if (!dbURI) {
-    //   return res.status(400).send({
-    //     status: 'error',
-    //     statecode: 400,
-    //     message: 'Invalid API path',
-    //   })
-    // }
+
+    // *如果後續沒有定義 例: /products 路由，
+    // 它會自然掉進你底部的 404 處理器
+    if (!dbURI) {
+      return next()
+    }
 
     // GET 不強制 database（用 default）
     const finalDatabase = database || defaultDatabase
@@ -269,7 +262,7 @@ environments.forEach((env) => {
   // app.use('/api2/users', userRouter);
   // app.use('/api2/rooms', roomRouter);
 })
-app.use('/', indexRouter)
+app.use(['/', '/index'], indexRouter);
 app.use('/error', errorRouter)
 // Swagger UI 提供靜態 API 文檔頁面
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))

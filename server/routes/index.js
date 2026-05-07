@@ -16,10 +16,10 @@ import dotenv from 'dotenv'
 // dotenv.config({ path: envFile })
 
 // ~變數取得位置1: 
-// ~進入點要先使用 import '../server/config/env.js'
+// ~但是,進入點要先使用 import '../server/config/env.js'
 // 這邊位置才能抓到，因為這時候才會執行到這裡
 const { VARIABLES } = process.env
-console.log('VARIABLES :', VARIABLES)
+// console.log('VARIABLES :', VARIABLES)
 
 const router = express.Router()
 // ~在這裡應用中間件 就全部一起使用
