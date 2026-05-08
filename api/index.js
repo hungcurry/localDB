@@ -1,5 +1,5 @@
 // #region import
-import '../server/config/env.js'// 確保第一行加載環境變數
+import '../server/config/env.js' // 確保第一行加載環境變數
 import express from 'express'
 import chalk from 'chalk'
 import path from 'path'
@@ -44,12 +44,19 @@ const corsMiddleware = (req, res, next) => {
 
   res.set(corsHeaders)
 
-  // 開發環境或合法來源直接放行
-  if (env === 'dev' || env === 'development' || !origin || corsHeaders['Access-Control-Allow-Origin'] === origin) {
+  // 1. 開發環境直接放行
+  if (env === 'development' || env === 'dev') return next()
+
+  // 2. 如果沒有 origin (代表不是瀏覽器跨域請求，是 curl/Postman/Server-side)
+  // 這種請求不歸 CORS 管，直接放行
+  if (!origin) return next()
+
+  // 3. 有 origin 時，檢查產出的 headers 是否包含對應的 Access-Control-Allow-Origin
+  if (corsHeaders['Access-Control-Allow-Origin'] === origin) {
     return next()
   }
 
-  // 非法來源回傳 403
+  // 只有真的「有 Origin 但不匹配」才噴 403
   res.status(403).json({
     status: 'error',
     message: '無效的來源請求 (CORS policy violation)',
@@ -161,9 +168,7 @@ const defaultDbMap = {
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行
 // 這邊新增後,下面Router的路徑也要記得加上去
-const excludedPaths = [
-  '/', 'index', 'api-docs', 'error'
-]
+const excludedPaths = ['/', 'index', 'api-docs', 'error']
 app.use(async (req, res, next) => {
   try {
     /**
@@ -181,10 +186,9 @@ app.use(async (req, res, next) => {
       if (path === 'favicon.ico' || path === '.well-known' || path === 'robots.txt') {
         return res.status(404).end()
       }
-      
+
       return next()
     }
-
 
     /**
      * 如果是 GET：返回一個空物件 {}。因為 GET 請求通常不帶 body，資料應該在 query 中。
@@ -218,7 +222,6 @@ app.use(async (req, res, next) => {
     // 得到 mongoURIs.api2 (連線到 dev 伺服器)
     const defaultDatabase = defaultDbMap[path]
     // 透過 defaultDbMap["api2"] 得到 "devDB"。
-
 
     // *如果後續沒有定義 例: /products 路由，
     // 它會自然掉進你底部的 404 處理器
@@ -262,14 +265,14 @@ environments.forEach((env) => {
   // app.use('/api2/users', userRouter);
   // app.use('/api2/rooms', roomRouter);
 })
-app.use(['/', '/index'], indexRouter);
+app.use(['/', '/index'], indexRouter)
 app.use('/error', errorRouter)
 
 // Swagger UI 提供靜態 API 文檔頁面
 // ~原本方式
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 // !解決部屬Vercel Swagger(無法顯示問題) => 使用CDN
-app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(swaggerDocs, SWAGGER_OPTIONS))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, SWAGGER_OPTIONS))
 
 // ===================
 // ... Error ...
@@ -299,7 +302,7 @@ const startServer = () => {
     // *public
     // http://localhost:3000/about.html
     // http://localhost:3000/stylesheets/style.css
-
+    
     // *ejs模板首頁
     // http://localhost:3000
     // console.log(`Server running on http://localhost:${post}`)
