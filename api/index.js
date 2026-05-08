@@ -267,21 +267,21 @@ app.use('/error', errorRouter)
 
 // *原本方式
 // Swagger UI 提供靜態 API 文檔頁面
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 // !解決部屬Vercel Swagger(無法顯示問題) => 使用CDN
-const SWAGGER_OPTIONS = {
-  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
-  customJs: [
-    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
-  ],
-}
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocs, SWAGGER_OPTIONS)
-)
+// const SWAGGER_OPTIONS = {
+//   customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
+//   customJs: [
+//     "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js",
+//     "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
+//   ],
+// }
+// app.use(
+//   '/api-docs',
+//   swaggerUi.serve,
+//   swaggerUi.setup(swaggerDocs, SWAGGER_OPTIONS)
+// )
 
 // ===================
 // ... Error ...
