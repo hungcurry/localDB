@@ -1,3 +1,4 @@
+// #region 客戶端
 // 客戶端
 // fetch('http://localhost:3000/api/users', {
 //   method: 'PUT',
@@ -14,9 +15,10 @@
 // ✅ 無 origin → 不設 header
 // ✅ 僅白名單才設 Allow-Origin
 // ✅ .split(',') 加 trim() 防空白 bug
+// #endregion
 
 // 根據環境配置 CORS
-const CORS_CONFIG = {
+export const CORS_CONFIG = {
   HEADERS: [
     'Content-Type',
     'Authorization',
@@ -39,13 +41,13 @@ const CORS_CONFIG = {
 }
 
 // 判斷 origin
-const getAllowedOrigin = (origin) => {
+export const getAllowedOrigin = (origin) => {
   const env = process.env.NODE_ENV || 'development'
 
   // 沒有 origin（Postman / curl）
   if (!origin) return null
 
-  // dev：動態允許（不能用 '*', 因為有 credentials）
+  // dev：動態允許
   if (env === 'dev' || env === 'development') {
     return origin
   }
@@ -55,7 +57,6 @@ const getAllowedOrigin = (origin) => {
     return origin
   }
 
-  // 拒絕
   return null
 }
 
@@ -70,7 +71,7 @@ const headers = (req) => {
     'Access-Control-Allow-Credentials': 'true',
   }
 
-  // 只有合法 origin 才設
+  // 合法 origin 才設
   if (allowedOrigin) {
     baseHeaders['Access-Control-Allow-Origin'] = allowedOrigin
   }

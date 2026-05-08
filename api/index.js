@@ -5,13 +5,13 @@ import chalk from 'chalk'
 import path from 'path'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import headers from '../server/utils/header.js'
 import indexRouter from '../server/routes/index.js'
 import userRouter from '../server/routes/user.js'
 import roomRouter from '../server/routes/room.js'
 import tokenRouter from '../server/routes/token.js'
 import errorRouter from '../server/routes/error.js'
 import connectDB from '../db/connection.js'
+import headers, { getAllowedOrigin } from '../server/utils/header.js'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { catchHttpErrors } from '../server/middlewares/errorHandler.js'
 import { parse } from 'url'
@@ -43,15 +43,20 @@ const corsMiddleware = (req, res, next) => {
 
   const allowedOrigin = getAllowedOrigin(origin)
 
-  // 設 headers
+  // 設定 CORS headers
   res.set(headers(req))
 
-  // dev 全開
+  // OPTIONS 預檢請求
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204)
+  }
+
+  // dev 全放行
   if (env === 'development' || env === 'dev') {
     return next()
   }
 
-  // curl / postman / server-side
+  // curl / postman / SSR
   if (!origin) {
     return next()
   }
@@ -61,7 +66,7 @@ const corsMiddleware = (req, res, next) => {
     return next()
   }
 
-  // 不合法
+  // 拒絕
   return res.status(403).json({
     status: 'error',
     message: '無效的來源請求 (CORS policy violation)',
