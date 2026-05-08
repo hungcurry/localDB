@@ -41,27 +41,27 @@ const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin
   const env = process.env.NODE_ENV || 'development'
 
-  // 開發環境直接放行
-  if (env === 'development' || env === 'dev') {
-    if (origin) {
-      res.set('Access-Control-Allow-Origin', origin)
-    }
+  const allowedOrigin = getAllowedOrigin(origin)
 
+  // 設 headers
+  res.set(headers(req))
+
+  // dev 全開
+  if (env === 'development' || env === 'dev') {
     return next()
   }
 
-  // curl / postman / SSR
+  // curl / postman / server-side
   if (!origin) {
     return next()
   }
 
-  // 白名單驗證
-  if (CORS_CONFIG.ORIGINS.includes(origin)) {
-    res.set('Access-Control-Allow-Origin', origin)
-
+  // 白名單合法
+  if (allowedOrigin) {
     return next()
   }
 
+  // 不合法
   return res.status(403).json({
     status: 'error',
     message: '無效的來源請求 (CORS policy violation)',
