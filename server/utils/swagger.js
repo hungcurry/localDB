@@ -1,6 +1,8 @@
 import swaggerJsDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 // ~npm install swagger-jsdoc swagger-ui-express
+
+// swagger-jsdoc 設定
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
@@ -16,11 +18,21 @@ const swaggerOptions = {
     },
     servers: [
       { url: 'http://localhost:3000', description: '本地開發伺服器' },
-      { url: 'https://localdb-1w4g.onrender.com', description: '生產環境伺服器' },
+      { url: 'https://local-db.vercel.app', description: '生產環境伺服器' },
     ],
   },
   apis: ['./server/routes/*.js'],
 }
 
+// swagger-ui-express UI 設定
+// !解決部屬Vercel Swagger(無法顯示問題) => 使用CDN
+const SWAGGER_OPTIONS = {
+  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
+  ],
+}
+
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
-export { swaggerDocs, swaggerUi }
+export { swaggerDocs, swaggerUi, SWAGGER_OPTIONS }
