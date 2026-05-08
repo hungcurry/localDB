@@ -8,14 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/api-docs/(.*)",
-      "dest": "api/index.js",
-      "continue": true
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
       "dest": "api/index.js"
     }
