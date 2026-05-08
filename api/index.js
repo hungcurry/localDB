@@ -1,10 +1,10 @@
 // #region import
 import '../server/config/env.js' // 確保第一行加載環境變數
 import express from 'express'
+import cors from 'cors'
 import corsOptions from '../server/utils/cors.js'
 import chalk from 'chalk'
 import path from 'path'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import indexRouter from '../server/routes/index.js'
 import userRouter from '../server/routes/user.js'
@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === 'dev') {
 // ===================
 const app = express()
 // 先處理跨域 (最優先)
-app.use(corsOptions)
+app.use(cors(corsOptions))
 
 // ===================
 // ... 伺服器 ...

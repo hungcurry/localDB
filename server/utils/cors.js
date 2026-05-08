@@ -16,36 +16,59 @@
 // ✅ 僅白名單才設 Allow-Origin
 // ✅ .split(',') 加 trim() 防空白 bug
 // #endregion
+import cors from 'cors'
 
-// 根據環境配置 CORS
+// 允許跨域存取的白名單網址
 const whitelist = [
+  // 本機開發環境
   'http://127.0.0.1:8080',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:8080',
+  // Vercel 部署環境
   'https://vue-env.vercel.app',
   'https://vue-test-three.vercel.app',
   'https://local-db.vercel.app',
 ]
 
-const corsOptions = {
+// 建立 cors middleware
+const corsMiddleware = cors({
+  /**
+   * origin 驗證
+   *
+   * @param {string | undefined} origin
+   * 瀏覽器來源網址
+   *
+   * @param {Function} callback
+   * callback(error, allow)
+   */
+
   origin(origin, callback) {
-    // 允許 curl / postman / server-to-server
+    // 沒有 origin 代表:
+    // - curl
+    // - postman
+    // - server-to-server
+    // 這些請求允許通過
     if (!origin) {
       return callback(null, true)
     }
 
+    // 檢查是否在白名單內
     if (whitelist.includes(origin)) {
       return callback(null, true)
     }
 
+    // 不在白名單 → 拒絕
     return callback(new Error('Not allowed by CORS'))
   },
 
+  // 是否允許攜帶 cookie / session
   credentials: true,
 
+  // 允許的 HTTP 方法
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 
+  // 允許的 request headers
   allowedHeaders: [
     'Content-Type',
     'Authorization',
@@ -54,6 +77,7 @@ const corsOptions = {
     'Content-Length',
     'X-Requested-With',
   ],
-}
+})
 
-export default corsOptions
+// 匯出 middleware
+export default corsMiddleware
