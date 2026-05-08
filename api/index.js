@@ -267,7 +267,7 @@ app.use('/error', errorRouter)
 
 // *原本方式
 // Swagger UI 提供靜態 API 文檔頁面
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 // !解決部屬Vercel Swagger(無法顯示問題) => 使用CDN
 const SWAGGER_OPTIONS = {
