@@ -40,31 +40,36 @@ const app = express()
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin
   const env = process.env.NODE_ENV || 'development'
-  const corsHeaders = headers(req)
 
-  res.set(corsHeaders)
+  // 開發環境直接放行
+  if (env === 'development' || env === 'dev') {
+    if (origin) {
+      res.set('Access-Control-Allow-Origin', origin)
+    }
 
-  // 1. 開發環境直接放行
-  if (env === 'development' || env === 'dev') return next()
-
-  // 2. 如果沒有 origin (代表不是瀏覽器跨域請求，是 curl/Postman/Server-side)
-  // 這種請求不歸 CORS 管，直接放行
-  if (!origin) return next()
-
-  // 3. 有 origin 時，檢查產出的 headers 是否包含對應的 Access-Control-Allow-Origin
-  if (corsHeaders['Access-Control-Allow-Origin'] === origin) {
     return next()
   }
 
-  // 只有真的「有 Origin 但不匹配」才噴 403
-  res.status(403).json({
+  // curl / postman / SSR
+  if (!origin) {
+    return next()
+  }
+
+  // 白名單驗證
+  if (CORS_CONFIG.ORIGINS.includes(origin)) {
+    res.set('Access-Control-Allow-Origin', origin)
+
+    return next()
+  }
+
+  return res.status(403).json({
     status: 'error',
     message: '無效的來源請求 (CORS policy violation)',
   })
 }
 app.use(corsMiddleware)
 // 先處理跨域 (最優先)
-app.use(cors())
+// app.use(cors())
 
 // ===================
 // ... 伺服器 ...
@@ -302,7 +307,7 @@ const startServer = () => {
     // *public
     // http://localhost:3000/about.html
     // http://localhost:3000/stylesheets/style.css
-    
+
     // *ejs模板首頁
     // http://localhost:3000
     // console.log(`Server running on http://localhost:${post}`)
