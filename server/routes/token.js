@@ -19,13 +19,30 @@ const router = express.Router()
 // ~各別使用
 // !同一路由不能同時定義兩個相同的 HTTP 方法（如 / 然後有2個POST）
 
+// ===================
+// ... Token ...
+// ===================
 /**
  * @swagger
- * /token:
+ * tags:
+ *   name: Token
+ *   description: 使用者管理 API
+ */
+
+/**
+ * @swagger
+ * /{env}/token:
  *   get:
  *     summary: 生成令牌
  *     description: 生成一個新的訪問令牌
  *     tags: [Token]
+ *     parameters:
+ *       - in: path
+ *         name: env
+ *         required: true
+ *         description: API環境 (api, api2, api3)
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: 成功生成令牌
@@ -56,13 +73,20 @@ router.get('/', utilGenerateToken)
 
 /**
  * @swagger
- * /token/validate:
+ * /{env}/token/validate:
  *   get:
  *     summary: 驗證令牌
  *     description: 驗證提供的訪問令牌是否有效
  *     tags: [Token]
+ *     parameters:
+ *       - in: path
+ *         name: env
+ *         required: true
+ *         description: API環境 (api, api2, api3)
+ *         schema:
+ *           type: string
  *     security:
- *       - customAuth: []  # 使用自定義的 customAuth 安全方案
+ *       - tokenAuth: []  # 使用 Token 組的驗證方式
  *     responses:
  *       200:
  *         description: 令牌有效
@@ -93,14 +117,6 @@ router.get('/', utilGenerateToken)
  *               properties:
  *                 error:
  *                   type: string
- *
- * components:
- *   securitySchemes:
- *     customAuth:
- *       type: apiKey  # 改用 apiKey 而非 bearer
- *       name: Authorization
- *       in: header
- *       description: 輸入自定義 token，無需添加 'Bearer ' 前綴
  */
 // 驗證令牌
 router.get('/validate', checkAuthorization)
@@ -110,11 +126,18 @@ router.get('/validate', checkAuthorization)
 // ===================
 /**
  * @swagger
+ * tags:
+ *   name: JWToken
+ *   description: 使用者管理 API
+ */
+
+/**
+ * @swagger
  * /{env}/token/signup:
  *   post:
  *     summary: 註冊用戶-JWT
  *     description: 用於註冊新用戶，並生成訪問Jwt令牌。
- *     tags: [Token]
+ *     tags: [JWToken]
  *     parameters:
  *       - in: path
  *         name: env
@@ -155,7 +178,7 @@ router.get('/signup', checkText, handleGetPeople, handlePostPerson, checkJWTSign
  *   post:
  *     summary: 登入用戶-JWT
  *     description: 用於用戶登入，並生成訪問Jwt令牌。
- *     tags: [Token]
+ *     tags: [JWToken]
  *     parameters:
  *       - in: path
  *         name: env
@@ -193,7 +216,7 @@ router.post('/login', handleGetPeople , checkJWTLogin)
  *   get:
  *     summary: 驗證令牌-JWT
  *     description: 驗證JWT並返回用戶的個人資料。
- *     tags: [Token]
+ *     tags: [JWToken]
  *     parameters:
  *       - in: path
  *         name: env
@@ -202,7 +225,7 @@ router.post('/login', handleGetPeople , checkJWTLogin)
  *         schema:
  *           type: string
  *     security:
- *       - customAuth: []  # 使用自定義的 customAuth 安全方案
+ *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     responses:
  *       200:
  *         description: 成功獲取用戶資料

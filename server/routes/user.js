@@ -25,6 +25,16 @@ const router = express.Router()
 // ~各別使用
 // !同一路由不能同時定義兩個相同的 HTTP 方法（如 / 然後有2個POST）
 
+// ===================
+// ... Users ...
+// ===================
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: 使用者管理 API
+ */
+
 /**
  * @swagger
  * /{env}/users:
@@ -80,7 +90,7 @@ router.get('/get-users', checkText, checkClientFrom, handleGetUsers)
  *         schema:
  *           type: string
  *     security:
- *       - customAuth: []  # 使用自定義的 customAuth 安全方案
+ *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     requestBody:
  *       required: true
  *       content:
@@ -144,7 +154,7 @@ router.post('/', checkText, checkJWTAuthorization, checkContentTypeBody, handleP
  *         schema:
  *           type: string
  *     security:
- *       - customAuth: []  # 使用自定義的 customAuth 安全方案
+ *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     requestBody:
  *       required: true
  *       content:
@@ -205,7 +215,7 @@ router.put('/:id', checkText, checkJWTAuthorization, checkContentTypeBody, handl
  *         schema:
  *           type: string
  *     security:
- *       - customAuth: []  # 使用自定義的 customAuth 安全方案
+ *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     responses:
  *       200:
  *         description: 成功刪除用戶

@@ -84,11 +84,10 @@ const checkText = (req, res, next) => {
 const checkAuthorization = (req, res, next) => {
   const authHeader = req.headers['authorization']
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader) {
     return utilSendErrorResponse(res, 401, 'Authorization 欄位未提供或格式錯誤')
   }
-
-  const token = authHeader.split(' ')[1]
+  const token = authHeader.split(' ')
   const expiryTime = tokens[token]
 
   if (!expiryTime) {
