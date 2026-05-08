@@ -265,7 +265,24 @@ environments.forEach((env) => {
 app.use(['/', '/index'], indexRouter);
 app.use('/error', errorRouter)
 // Swagger UI 提供靜態 API 文檔頁面
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+
+// 解決部屬使用CDN => Vercel + Express + Swagger(無法顯示問題)
+const SWAGGER_OPTIONS = {
+  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js",
+  ],
+  customSiteTitle: "API Documentation", // 順便設定分頁標題
+};
+
+// 使用方式
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocs, SWAGGER_OPTIONS)
+);
 
 // ===================
 // ... Error ...
