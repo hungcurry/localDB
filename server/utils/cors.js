@@ -32,7 +32,7 @@ const whitelist = [
 ]
 
 // 建立 cors middleware
-const corsMiddleware = cors({
+const corsOptions = {
   /**
    * origin 驗證
    *
@@ -77,7 +77,7 @@ const corsMiddleware = cors({
     'Content-Length',
     'X-Requested-With',
   ],
-})
+}
 
 // 匯出 middleware
-export default corsMiddleware
+export default corsOptions
