@@ -142,7 +142,7 @@ const defaultDbMap = {
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行
 // 這邊新增後,下面Router的路徑也要記得加上去
-const excludedPaths = ['/', 'index', 'api-docs', 'error']
+const excludedPaths = ['/', 'index', 'api-docs', 'error', 'favicon.ico', '.well-known', 'robots.txt']
 app.use(async (req, res, next) => {
   try {
     /**
