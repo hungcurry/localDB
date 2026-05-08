@@ -1,6 +1,7 @@
 // #region import
 import '../server/config/env.js' // 確保第一行加載環境變數
 import express from 'express'
+import corsOptions from '../server/utils/cors.js'
 import chalk from 'chalk'
 import path from 'path'
 import cors from 'cors'
@@ -11,7 +12,6 @@ import roomRouter from '../server/routes/room.js'
 import tokenRouter from '../server/routes/token.js'
 import errorRouter from '../server/routes/error.js'
 import connectDB from '../db/connection.js'
-// import headers, { getAllowedOrigin } from '../server/utils/header.js'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { catchHttpErrors } from '../server/middlewares/errorHandler.js'
 import { parse } from 'url'
@@ -38,45 +38,7 @@ if (process.env.NODE_ENV === 'dev') {
 // ===================
 const app = express()
 // 先處理跨域 (最優先)
-const whitelist = [
-  'http://127.0.0.1:8080',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:8080',
-  'https://vue-env.vercel.app',
-  'https://vue-test-three.vercel.app',
-  'https://local-db.vercel.app',
-]
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      // 允許 curl / postman / server-to-server
-      if (!origin) {
-        return callback(null, true)
-      }
-
-      if (whitelist.includes(origin)) {
-        return callback(null, true)
-      }
-
-      return callback(new Error('Not allowed by CORS'))
-    },
-
-    credentials: true,
-
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Client-From',
-      'X-Client-Language',
-      'Content-Length',
-      'X-Requested-With',
-    ],
-  }),
-)
+app.use(corsMiddleware)
 
 // ===================
 // ... 伺服器 ...
