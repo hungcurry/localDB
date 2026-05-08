@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === 'dev') {
 // ===================
 const app = express()
 // 先處理跨域 (最優先)
-app.use(corsMiddleware)
+app.use(corsOptions)
 
 // ===================
 // ... 伺服器 ...
