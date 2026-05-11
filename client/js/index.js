@@ -195,7 +195,7 @@ const fetchUsers = async () => {
 //   // http://localhost:3000/api3/users  => testDB
 //   const queryData = {
 //     database: 'prodDB',
-//     collection: 'AdminUserData',
+//     collection: 'User', // 'AdminUserData' 或 User
 //   }
 //   const response = await fetch('http://localhost:3000/api/users/get-users?room=555', {
 //     method: 'POST',

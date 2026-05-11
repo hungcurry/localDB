@@ -93,7 +93,18 @@
 // #region express方式
 import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../db/index.js'
 
-const handleGetUsers = async (req, res, next) => {
+// 建立對照表：Key 是前端傳來的字串，Value 是對應的資料庫啟動函式
+const collectionMap = {
+  User: getDBUsers,
+  // AdminUserData: getDBAdminUser,
+  // XXXX: getDBXXXX,
+}
+
+// ===================
+// ... Collection ...
+// ===================
+// ~如果是用 !Get user 第二種 取資料POST 方式的話
+const handleGetByCollection = async (req, res, next) => {
   try {
     // ~如果是用 !Get user 第二種 取資料POST 方式的話
     // 就會在這裡拿到Collection,然後去 對應的Collection裡面取資料
@@ -101,6 +112,34 @@ const handleGetUsers = async (req, res, next) => {
     // ~console.log(`targetCollection:`, targetCollection)
     // collection: 'AdminUserData' 或 User
 
+    // 檢查對照表是否存在該 Key
+    const getModelFn = collectionMap[targetCollection]
+
+    if (!getModelFn) {
+      return res.status(400).json({
+        success: false,
+        message: `找不到對應的集合: ${targetCollection}`,
+      })
+    }
+
+    // 執行函式取得 Model 並取資料
+    const users = await getDBUsers()
+    res.status(200).json({
+      status: 'success',
+      statecode: 200,
+      data: users,
+    })
+  } 
+  catch (err) {
+    // 傳遞錯誤給錯誤處理中間件
+    next(err)
+  }
+}
+// ===================
+// ... 正常方式 ...
+// ===================
+const handleGetUsers = async (req, res, next) => {
+  try {
     const users = await getDBUsers()
     res.status(200).json({
       status: 'success',
@@ -177,4 +216,4 @@ const handleDeleteUser = async (req, res, next) => {
   }
 }
 
-export { handleGetUsers, handlePostUser, handlePutUser, handleDeleteUser }
+export { handleGetUsers, handlePostUser, handlePutUser, handleDeleteUser , handleGetByCollection }

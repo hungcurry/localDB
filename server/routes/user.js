@@ -10,7 +10,8 @@ import {
   handleGetUsers, 
   handlePostUser, 
   handlePutUser, 
-  handleDeleteUser 
+  handleDeleteUser,
+  handleGetByCollection,
 } from '../controllers/userController.js'
 
 const router = express.Router()
@@ -73,7 +74,7 @@ router.get('/', checkText, checkClientFrom, handleGetUsers) // 需要有client-f
  *       200:
  *         description: 成功獲取用戶列表
  */
-router.post('/get-users', checkText, checkClientFrom, handleGetUsers) // 需要有client-from
+router.post('/get-users', checkText, checkClientFrom, handleGetByCollection) // 需要有client-from
 router.get('/get-users', checkText, checkClientFrom, handleGetUsers) 
 /**
  * @swagger

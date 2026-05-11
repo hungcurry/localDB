@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 import chalk from 'chalk'
 
 // 判斷當前環境並加載相應的.env 檔案
@@ -16,12 +16,33 @@ import chalk from 'chalk'
 // }
 
 // 判斷當前環境並加載相應的.env 檔案
-const envFile = {
-  production: '.env.prod',
-  test: '.env.test',
-  development: '.env.dev'
-}[process.env.NODE_ENV] || '.env.dev';
+const envFile =
+  {
+    production: '.env.prod',
+    prod: '.env.prod',
+    test: '.env.test',
+    development: '.env.dev',
+    dev: '.env.dev',
+  }[process.env.NODE_ENV] || '.env.dev'
 
-dotenv.config({ path: envFile });
+/**
+ * 步驟說明：
+ * 01-
+ * const envFile = {
+    production: '.env.prod',
+    prod: '.env.prod',
+    test: '.env.test',
+    development: '.env.dev',
+    dev: '.env.dev'
+  }
+  02-
+  envFile [process.env.NODE_ENV] 
+
+  03-
+  envFile ["dev"] => '.env.dev'
+ * 
+ */
+
+dotenv.config({ path: envFile })
 
 console.log(chalk.red(`[Config] 環境變數已載入: ${envFile}`))
