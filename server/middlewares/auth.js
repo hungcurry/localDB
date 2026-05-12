@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs' // 密碼加密
 import { v4 as uuidv4 } from 'uuid'
 import { getConfig } from '../config/index.js'
+import { signToken , verifyToken } from '../utils/generateJWT.js'
 
 // 用於存儲 token 及其有效期
 const tokens = {}
@@ -150,7 +151,7 @@ const checkContentTypeBody = (req, res, next) => {
 // ... JWT Token ( Bearer ) ...
 // ===================
 // 取得密鑰
-const secretKey = getConfig('secret.jwtSecret')
+// const secretKey = getConfig('secret.jwtSecret')
 // console.log(`auth` , secretKey)
 // ------------------
 // 註冊
@@ -188,7 +189,9 @@ const checkJWTLogin = async (req, res) => {
   // JWT 標準規範中，iat 和 exp 的值必須是以秒為單位的 UNIX 時間戳
   const payload = { email, username: user.username }
   // 生成 JWT token，設定過期時間為 1 小時
-  const token = jwt.sign(payload, secretKey, { expiresIn: '1h' })
+  // const token = jwt.sign(payload, secretKey, { expiresIn: '1h' })
+  const token = signToken(payload)
+
   //console.log(token)
   // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
@@ -202,32 +205,33 @@ const checkJWTLogin = async (req, res) => {
 // 驗證 JWT
 const checkJWTAuthorization = (req, res, next) => {
   const authHeader = req.headers['authorization']
+
   // 從 "Bearer <token>" 中分割提取 token
-  const token = authHeader?.split(' ')[1]
+  const token = authHeader?.startsWith('Bearer ') 
+      ? authHeader.split(' ')[1] 
+      : null
   console.log(`Received token: ${token}`)
 
-  // 3-1 驗證用戶有送token
+  // 1. 驗證用戶有送token
   if (!token) {
-    return res.status(401).json({ error: '未登入' })
+    return res.status(401).json({
+      status: 'error',
+      message: '未登入，缺少認證令牌',
+    })
   }
 
-  // 3-2 進行驗證與解析
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      const errorMessage = err.name === 'TokenExpiredError' ? '令牌已過期' : '驗證錯誤'
-      return res.status(403).json({ error: errorMessage })
-    }
+  try {
+    // 2. 使用封裝好的 utils 進行驗證
+    // jwt.verify 內部已包含過期(exp)檢查，不需手動比對 timestamp
+    const decoded = verifyToken(token)
 
-    // 進行手動過期時間檢查
-    const currentTimestamp = Math.floor(Date.now() / 1000)
-    if (decoded.exp < currentTimestamp) {
-      return res.status(403).json({ error: '令牌已過期' })
-    }
-
+    // 3. 將解碼後的用戶資訊掛載到 req，讓後續的路由可以使用
+    req.user = decoded
     // console.log('解碼後的用戶:', decoded)
     // console.log(users[decoded.email])
 
-    // 如果 token 有效，回傳成功訊息
+    // 4. 特殊路徑處理 (validate / profile)
+    // 註：實務上建議這些路由在 Controller 回傳，但若要保留在 middleware 則如下：
     if (['/validate', '/profile'].includes(req.path)) {
       return res.json({
         status: 'success',
@@ -236,8 +240,19 @@ const checkJWTAuthorization = (req, res, next) => {
       })
     }
 
+    // 5. 驗證成功，繼續下一個 middleware
     next()
-  })
+  } 
+  catch (error) {
+    // 6. 錯誤處理：區分過期或其他錯誤
+    const isExpired = error.message.includes('expired')
+
+    return res.status(403).json({
+      status: 'error',
+      message: isExpired ? '令牌已過期' : '驗證錯誤',
+      debug: process.env.NODE_ENV === 'dev' ? error.message : undefined,
+    })
+  }
 }
 
 export {

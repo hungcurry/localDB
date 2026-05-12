@@ -43,6 +43,7 @@ const router = express.Router()
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     responses:
  *       200:
  *         description: 成功生成令牌
@@ -85,6 +86,7 @@ router.get('/', utilGenerateToken)
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     security:
  *       - tokenAuth: []  # 使用 Token 組的驗證方式
  *     responses:
@@ -145,6 +147,7 @@ router.get('/validate', checkAuthorization)
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     requestBody:
  *       required: true
  *       content:
@@ -186,6 +189,7 @@ router.get('/signup', checkText, handleGetPeople, handlePostPerson, checkJWTSign
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     requestBody:
  *       required: true
  *       content:
@@ -224,6 +228,7 @@ router.post('/login', handleGetPeople , checkJWTLogin)
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     security:
  *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     responses:

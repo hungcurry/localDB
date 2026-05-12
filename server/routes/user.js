@@ -50,6 +50,7 @@ const router = express.Router()
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     responses:
  *       200:
  *         description: 成功獲取用戶列表
@@ -70,9 +71,30 @@ router.get('/', checkText, checkClientFrom, handleGetUsers) // 需要有client-f
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - database
+ *               - collection
+ *             properties:
+ *               database:
+ *                 type: string
+ *                 description: 資料庫名稱
+ *                 example: prodDB
+ *               collection:
+ *                 type: string
+ *                 description: 集合名稱 (User 或 AdminUserData)
+ *                 example: User
  *     responses:
  *       200:
  *         description: 成功獲取用戶列表
+ *       400:
+ *         description: 請求格式錯誤
  */
 router.post('/get-users', checkText, checkClientFrom, handleGetByCollection) // 需要有client-from
 router.get('/get-users', checkText, checkClientFrom, handleGetUsers) 
@@ -90,6 +112,7 @@ router.get('/get-users', checkText, checkClientFrom, handleGetUsers)
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *     security:
  *       - JWTAuth: []  # 使用 User 組的驗證方式
  *     requestBody:
@@ -148,6 +171,7 @@ router.post('/', checkText, checkJWTAuthorization, checkContentTypeBody, handleP
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *       - in: path
  *         name: id
  *         required: true
@@ -209,6 +233,7 @@ router.put('/:id', checkText, checkJWTAuthorization, checkContentTypeBody, handl
  *         description: API環境 (api, api2, api3)
  *         schema:
  *           type: string
+ *           enum: [api, api2, api3]
  *       - in: path
  *         name: id
  *         required: true
