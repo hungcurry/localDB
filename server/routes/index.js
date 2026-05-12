@@ -16,10 +16,16 @@ import dotenv from 'dotenv'
 // dotenv.config({ path: envFile })
 
 // ~變數取得位置1:
-// ~但是,進入點要先使用 import '../server/config/env.js'
+// ~但是,進入點api/index.js要先使用 import '../server/config/env.js'
 // 這邊位置才能抓到，因為這時候才會執行到這裡
-const { VARIABLES } = process.env
+// const { VARIABLES } = process.env
+
+import { getConfig } from '../config/index.js'
+const VARIABLES = getConfig('secret.variables')
+const JWT_EXPIRES_DAY = getConfig('secret.jwtExpiresDay')
+
 // console.log('VARIABLES :', VARIABLES)
+// console.log('JWT_EXPIRES_DAY :', JWT_EXPIRES_DAY)
 
 const router = express.Router()
 // ~在這裡應用中間件 就全部一起使用

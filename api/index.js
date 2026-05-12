@@ -1,4 +1,7 @@
 // #region import
+// ~基本方式 只有一種環境變數
+// import 'dotenv/config' // 確保第一行加載環境變數
+// ~進階方式 根據不同環境NODE_ENV,加載不同的 .env 檔案
 import '../server/config/env.js' // 確保第一行加載環境變數
 import express from 'express'
 import cors from 'cors'

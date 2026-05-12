@@ -2,6 +2,8 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs' // 密碼加密
 import { v4 as uuidv4 } from 'uuid'
+import { getConfig } from '../config/index.js'
+
 // 用於存儲 token 及其有效期
 const tokens = {}
 // 設置 token 的有效期（例如 1 小時）
@@ -147,21 +149,10 @@ const checkContentTypeBody = (req, res, next) => {
 // ===================
 // ... JWT Token ( Bearer ) ...
 // ===================
-// 使用 process.env 取得密鑰
-let envFile
-switch (process.env.NODE_ENV) {
-  case 'production':
-    envFile = '.env.prod'
-    break
-  case 'test':
-    envFile = '.env.test'
-    break
-  default:
-    envFile = '.env.dev'
-    break
-}
-dotenv.config({ path: envFile })
-const secretKey = process.env.JWT_SECRET
+// 取得密鑰
+const secretKey = getConfig('secret.jwtSecret')
+// console.log(`auth` , secretKey)
+// ------------------
 // 註冊
 // 帳號: ccc@gmail.com
 // 密碼: 123

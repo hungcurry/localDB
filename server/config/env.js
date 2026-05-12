@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import chalk from 'chalk'
 
-// 判斷當前環境並加載相應的.env 檔案
+// ~判斷當前環境並加載相應的.env 檔案
 // let envFile
 // switch (process.env.NODE_ENV) {
 //   case 'production':
@@ -15,7 +15,7 @@ import chalk from 'chalk'
 //     break
 // }
 
-// 判斷當前環境並加載相應的.env 檔案
+// ~判斷當前環境並加載相應的.env 檔案
 const envFile =
   {
     production: '.env.prod',
