@@ -65,22 +65,14 @@ const responseStorage = new AsyncLocalStorage()
 // 1️⃣ 環境判斷與預設 Log 等級
 // =======================================================
 const isDevelopment = process.env.NODE_ENV === 'development'
+const isProd = process.env.NODE_ENV === 'production'
 const currentLevel = isDevelopment ? 'debug' : 'info'
 
 // =======================================================
-// 2️⃣ 確保 logs 目錄存在
+// 2️⃣ 確保 logs 目錄存在 (僅限非生產環境)
 // =======================================================
-// const logDir = path.join(process.cwd(), 'logs')
-
-// if (!fs.existsSync(logDir)) {
-//   fs.mkdirSync(logDir, { recursive: true })
-// }
-
-// 1. 取得環境變數
-const isProd = process.env.NODE_ENV === 'production'
-// 2. 定義路徑
 const logDir = path.join(process.cwd(), 'logs')
-// 3. 只有在「非生產環境」時才建立資料夾
+
 if (!isProd) {
   try {
     if (!fs.existsSync(logDir)) {
@@ -119,7 +111,7 @@ function sanitizeBody(body) {
 // 4️⃣ Logger Stream 設定
 // =======================================================
 
-// 定義 ANSI 顏色代碼 (你可以根據喜好調整)
+// 定義 ANSI 顏色代碼
 const colors = {
   reset: '\x1b[0m',
   pink: '\x1b[95m', // 用於 Key
@@ -170,18 +162,20 @@ const consoleStream = pretty({
   sync: true,
 })
 
+// 🚀 修改重點：動態建立 streams 陣列
 const streams = [
   {
     level: currentLevel,
     stream: consoleStream,
   },
+]
 
-  {
+// 只有在非生產環境（例如 Local）才加上檔案記錄功能
+if (!isProd) {
+  streams.push({
     level: currentLevel,
-
     stream: pino.transport({
       target: 'pino-roll',
-
       options: {
         file: path.join(logDir, 'app'),
         frequency: 'daily',
@@ -191,8 +185,8 @@ const streams = [
         limit: { count: 7 },
       },
     }),
-  },
-]
+  })
+}
 
 const multiStream = pino.multistream(streams)
 multiStream.level = currentLevel
@@ -277,7 +271,6 @@ export const baseHttpLogger = pinoHttp({
     if (error || res.statusCode >= 500) return 'error'
 
     // 2️⃣ 優先權次之：讀取你在 setLog 手動設定的等級
-    // 如果你有傳 'error'，這裡就會回傳 'error'，不再往下跑 400 的判斷
     if (locals?.logLevel) return locals.logLevel
 
     // 3️⃣ 預設自動判斷：根據 HTTP 狀態碼
@@ -304,9 +297,6 @@ export const baseHttpLogger = pinoHttp({
       headers: {
         host: req.headers.host,
         'user-agent': req.headers['user-agent'],
-
-        // 不建議記錄授權資訊，避免洩漏 token
-        // authorization: undefined
       },
     }),
 
