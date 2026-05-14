@@ -78,19 +78,17 @@ const currentLevel = isDevelopment ? 'debug' : 'info'
 
 // 1. 取得環境變數
 const isProd = process.env.NODE_ENV === 'production'
-// 2. 定義路徑：生產環境(Vercel)使用系統暫存區，開發環境使用本機專案目錄
-const logDir = isProd 
-  ? path.join(os.tmpdir(), 'logs') // Vercel 唯一可寫入的路徑
-  : path.join(process.cwd(), 'logs') // 本機開發路徑
-// 3. 建立資料夾（不論環境，只要不存在就建立）
-try {
-  if (!fs.existsSync(logDir)) {
-    // 在 /tmp 下建立資料夾是允許的
-    fs.mkdirSync(logDir, { recursive: true })
+// 2. 定義路徑
+const logDir = path.join(process.cwd(), 'logs')
+// 3. 只有在「非生產環境」時才建立資料夾
+if (!isProd) {
+  try {
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true })
+    }
+  } catch (err) {
+    console.error('Failed to create log directory:', err)
   }
-} catch (err) {
-  // 即使失敗也只紀錄不崩潰，避免影響主程式驗證邏輯
-  console.error('Log directory maintenance failed:', err)
 }
 
 // =======================================================
