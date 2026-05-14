@@ -92,6 +92,12 @@
 
 // #region express方式
 import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../db/index.js'
+// 引入 logger
+import { createLogger } from '../utils/logger.js'
+import { handleError, appError } from '../middlewares/errorHandler.js'
+
+// *logger參數順序：level, message, payload
+const logger = createLogger('userController')
 
 // 建立對照表：Key 是前端傳來的字串，Value 是對應的資料庫啟動函式
 const collectionMap = {
@@ -138,9 +144,48 @@ const handleGetByCollection = async (req, res, next) => {
 // ===================
 // ... 正常方式 ...
 // ===================
+/** *!新寫法 
+ * * Express 5 throw會接住錯誤
+ * 不需要 try-catch 了，直接 throw 就好，
+ * Express 5 會自動捕捉到錯誤並傳遞給全域錯誤處理器
+ * ------------
+
+  const handleGetUsers = async (req, res, next) => {
+    // const users = await getDBUsers()
+
+    let users = null
+    if (!users) {
+      // 直接 throw，Express 5 會接住
+      throw new appError(400, '傳給前端看的訊息', '伺服端的message')
+    }
+
+    res.status(200).json({
+      status: 'success',
+      statecode: 200,
+      data: users,
+    })
+  }
+
+ */
+
+
+/** *舊寫法 
+ *  * Express 4 需要 try-catch 包裹，
+ *  並且在 catch 裡面呼叫 next(err) 傳遞錯誤給全域處理器
+ */
 const handleGetUsers = async (req, res, next) => {
   try {
     const users = await getDBUsers()
+
+    // 🔥 人工製造錯誤,錯誤只會傳到server端,開發時候看到
+    // throw new Error('Database connection timeout')
+
+    // 訊息測試
+    logger.setLog('info', 'User list successfully', { userCount: users.length })
+    // logger.setLog('debug', 'Debug info', { rawData: 'some-internal-info' })
+    // logger.setLog('warn', 'get list of tasks to done', { userCount: users.length })
+
+    // 不寫.status(200),會預設帶入 200 "OK"。
     res.status(200).json({
       status: 'success',
       statecode: 200,
@@ -148,8 +193,31 @@ const handleGetUsers = async (req, res, next) => {
     })
   } 
   catch (err) {
-    // 傳遞錯誤給錯誤處理中間件
-    next(err)
+    // ✅ 方式 2：錯誤捕捉 (error) -> 終端顯示紅色
+    // 記錄 Log (給伺服器管理員看)
+    logger.setLog('error', 'failed to get user list', { err: err.message })
+
+    // * 自訂義錯誤處理
+    // handleError({
+    //   res,
+    //   statusCode: 400,
+    //   message: '無法取得資料',
+    //   err: err
+    // })
+
+
+    // * 將錯誤丟給全域處理器
+    // ~傳遞錯誤給錯誤處理中間件
+    // ~自訂錯誤訊息，讓客戶端知道發生了什麼錯誤
+    // err.statusCode = 400
+    // err.clientMessage = '無法取得待辦清單'
+    // next(err)
+
+    // 或 
+    // ~使用 appError 來創建一個新的錯誤物件，並傳遞給全域處理器
+    // ~順序：statusCode, clientMessage, message( 原始錯誤訊息, 給開發者看的 )
+    const AppError = new appError(400, '無法取得待辦清單', err.message)
+    next(AppError)
   }
 }
 const handlePostUser = async (req, res, next) => {
@@ -217,3 +285,5 @@ const handleDeleteUser = async (req, res, next) => {
 }
 
 export { handleGetUsers, handlePostUser, handlePutUser, handleDeleteUser , handleGetByCollection }
+// ------------------------------
+// #endregion

@@ -1,7 +1,9 @@
+import server from './server.js'
 import db from './db.js'
 import secret from './secret.js'
 
 const config = {
+  server,
   db,
   secret,
 }

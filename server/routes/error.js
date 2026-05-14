@@ -1,28 +1,99 @@
 import express from 'express'
-import { catchAsyncErrors } from '../middlewares/errorHandler.js'
+import { handleAsyncError, appError } from '../middlewares/errorHandler.js'
 const router = express.Router()
 // ~在這裡應用中間件 就全部一起使用
 // router.use(checkAuthorization);
 
+// #region
+// // 錯誤
+// const errorController = async function (req, res, next) {
+//   a // 未定義
+//   res.send({
+//     message: '錯誤狀態',
+//   })
+// }
+
+// // 正常
+// const someController = async function (req, res, next) {
+//   res.send({
+//     message: '正常狀態',
+//   })
+// }
+// #endregion
+
 // 錯誤
 const errorController = async function (req, res, next) {
-  a // 未定義
-  res.send({
-    message: '錯誤狀態',
-  })
+  let obj = null
+  const mockGetUserData = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(obj)
+      }, 1000)
+    })
+  }
+
+  // 等待 1 秒取得資料
+  const data = await mockGetUserData()
+  const AppError = new appError(400, '傳給前端看的訊息', '伺服端的message')
+  if (!data) {
+    throw AppError
+  }
 }
 
 // 正常
 const someController = async function (req, res, next) {
+  let obj = { name: 'curry' }
+  const mockGetUserData = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(obj)
+      }, 1000)
+    })
+  }
+
+  // 等待 1 秒取得資料
+  const data = await mockGetUserData()
+
+  const AppError = new appError(400, '傳給前端看的訊息', '伺服端的message')
+  if (!data) {
+    throw AppError
+  }
+
   res.send({
     message: '正常狀態',
+    statusCode: 200,
+    data,
   })
 }
 
+/** Express 4 / 5 async error 處理方式
+ * ------------------------------------
+ * Express 4：
+ * async error ❌ 不保證會被接住
+ *  要用手動使用 try...catch 去接..
+ * ❗ 可能 crash / unhandled rejection
+ * ----------------------
+ * Express 5：
+ * async error ✔ 內建 catch
+ * ❗ 幾乎不會因 async error 掛掉
+ * 結論: Express5 以後不用 handleAsyncError 去接
+ *
+ * *使用方式：
+ * ~寫法 A：在路由定義時包
+ * router.get('/', Asyncwrap(m1), Asyncwrap(m2), Asyncwrap(controller))
+ *
+ * ~寫法 B：在定義函式時就包好 (更推薦，乾淨很多)
+ * const checkJWT = Asyncwrap(async (req, res, next) => { ... })
+ * const handlePostUser = Asyncwrap(async (req, res) => { ... })
+ *
+ * router.get('/', checkJWT, handlePostUser)
+ *
+ */
+
 // 獨立 controller
-// 錯誤捕捉 => 回傳 500
+// 錯誤捕捉 => 回傳 400
 // http://localhost:3000/error
-router.get('/', catchAsyncErrors(errorController))
+router.get('/', handleAsyncError(errorController))
 
 // 不捕捉錯誤 伺服器會掛掉
 // http://localhost:3000/error/no-catch
@@ -30,6 +101,6 @@ router.get('/no-catch', errorController)
 
 // 能正確運作
 // http://localhost:3000/error/normal
-router.get('/normal', catchAsyncErrors(someController))
+router.get('/normal', handleAsyncError(someController))
 
 export default router

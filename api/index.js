@@ -16,7 +16,8 @@ import tokenRouter from '../server/routes/token.js'
 import errorRouter from '../server/routes/error.js'
 import connectDB from '../db/connection.js'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
-import { catchHttpErrors } from '../server/middlewares/errorHandler.js'
+import { handleNotFound , handleGlobalError } from '../server/middlewares/errorHandler.js'
+import { httpLogger } from '../server/utils/logger.js'
 import { parse } from 'url'
 import { createServer } from 'http'
 import { wss1, wss2 } from '../server/routes/ws.js'
@@ -111,6 +112,8 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // 解析cookie (如 JWT token 存在 cookie 中，或是前端需要設置 cookie)
 app.use(cookieParser())
+// 解析Logger 配置
+app.use(httpLogger)
 // 靜態文件中間件
 // 靜態文件服務，將 public 資料夾中的文件公開 不透過 express 路由
 // app.use(express.static(path.join(__dirname, 'public')))
@@ -255,13 +258,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, SWAGGER_OPTIO
 // ... Error ...
 // ===================
 // 捕捉 404 錯誤並傳遞到錯誤處理中間件
-app.use((req, res, next) => {
-  const err = new Error('API Not Found 奇怪？！我找不到資源 (´ﾟдﾟ`)，請重新確認一下你的 API 網址是否正確。')
-  err.status = 404
-  next(err)
-})
+app.use(handleNotFound)
 // 使用錯誤處理中間件
-app.use(catchHttpErrors)
+app.use(handleGlobalError)
 // 啟動伺服器
 const startServer = () => {
   server.listen(post, () => {
