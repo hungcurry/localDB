@@ -70,10 +70,25 @@ const currentLevel = isDevelopment ? 'debug' : 'info'
 // =======================================================
 // 2️⃣ 確保 logs 目錄存在
 // =======================================================
-const logDir = path.join(process.cwd(), 'logs')
+// const logDir = path.join(process.cwd(), 'logs')
 
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true })
+// if (!fs.existsSync(logDir)) {
+//   fs.mkdirSync(logDir, { recursive: true })
+// }
+
+// 1. 取得環境變數
+const isProd = process.env.NODE_ENV === 'production'
+// 2. 定義路徑
+const logDir = path.join(process.cwd(), 'logs')
+// 3. 只有在「非生產環境」時才建立資料夾
+if (!isProd) {
+  try {
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true })
+    }
+  } catch (err) {
+    console.error('Failed to create log directory:', err)
+  }
 }
 
 // =======================================================
