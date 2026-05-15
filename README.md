@@ -31,6 +31,70 @@ MONGO_URI_DEV=mongodb://127.0.0.1:27017/devDB
 MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
 ```
 
+#### handleAsyncError 原理
+
+> 原本
+```jsx
+// router/normal.js
+import { someController } from '../controllers/someController.js'
+router.get('/normal', someController)
+
+
+// controllers/someController.js
+// 每個路由都要寫一次，非常冗長
+const someController = async function (req, res, next) {
+  try {
+    const data = await someDatabaseTask(); // 假設這裡出錯了
+    res.send({ message: '成功', data });
+  } 
+  catch (err) {
+    // 你必須手動傳給 next，不然 Express 不知道出錯了
+    next(err); 
+  }
+}
+export { someController }
+```
+
+
+> 使用 handleAsyncError後
+```jsx
+// router/normal.js
+import { handleAsyncError } from '../middlewares/errorHandler.js'
+import { someController } from '../controllers/someController.js'
+router.get('/normal', handleAsyncError(someController))
+
+
+// middlewares/errorHandler.js
+const handleAsyncError = (asyncFn) => {
+  return async (req, res, next) => {
+    try {
+      await asyncFn(req, res, next)
+    } 
+    catch (err) {
+      if (!err) {
+        err = new Error('Unknown Error')
+      }
+
+      err.statusCode ??= 500
+      err.customMessage ??= '伺服器發生錯誤'
+
+      next(err)
+    }
+  }
+}
+export { handleAsyncError }
+
+// controllers/someController.js
+// Controller 變得超級乾淨，完全不用寫 try...catch
+const someController = async (req, res, next) => {
+  const data = await someDatabaseTask(); 
+  res.send({ message: '成功', data });
+}
+export { someController }
+```
+
+
+
 #### 公司localhost 無法連線 MongoDB原因
 ```jsx
 // MongoDB 對接口 : TCP 27017

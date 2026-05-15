@@ -90,6 +90,73 @@ const someController = async function (req, res, next) {
  *
  */
 
+
+/** handleAsyncError 原理
+ * ------------------------------------
+ * 
+    原本
+    ```jsx
+    // router/normal.js
+    import { someController } from '../controllers/someController.js'
+    router.get('/normal', someController)
+
+
+    // controllers/someController.js
+    // 每個路由都要寫一次，非常冗長
+    const someController = async function (req, res, next) {
+      try {
+        const data = await someDatabaseTask(); // 假設這裡出錯了
+        res.send({ message: '成功', data });
+      } 
+      catch (err) {
+        // 你必須手動傳給 next，不然 Express 不知道出錯了
+        next(err); 
+      }
+    }
+    export { someController }
+    ```
+
+
+    使用 handleAsyncError後
+    ```jsx
+    // router/normal.js
+    import { handleAsyncError } from '../middlewares/errorHandler.js'
+    import { someController } from '../controllers/someController.js'
+    router.get('/normal', handleAsyncError(someController))
+
+
+    // middlewares/errorHandler.js
+    const handleAsyncError = (asyncFn) => {
+      return async (req, res, next) => {
+        try {
+          await asyncFn(req, res, next)
+        } 
+        catch (err) {
+          if (!err) {
+            err = new Error('Unknown Error')
+          }
+
+          err.statusCode ??= 500
+          err.customMessage ??= '伺服器發生錯誤'
+
+          next(err)
+        }
+      }
+    }
+    export { handleAsyncError }
+
+    // controllers/someController.js
+    // Controller 變得超級乾淨，完全不用寫 try...catch
+    const someController = async (req, res, next) => {
+      const data = await someDatabaseTask(); 
+      res.send({ message: '成功', data });
+    }
+    export { someController }
+    ```
+ * 
+*/
+
+
 // 獨立 controller
 // 錯誤捕捉 => 回傳 400
 // http://localhost:3000/error

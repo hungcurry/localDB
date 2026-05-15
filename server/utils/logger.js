@@ -278,14 +278,15 @@ export const baseHttpLogger = pinoHttp({
   customLogLevel: (_req, res, error) => {
     const locals = res.locals
 
-    // 1️⃣ 優先權最高：如果程式有噴拋出 Error，強制標記為 error
-    if (error || res.statusCode >= 500) return 'error'
+    // 1️⃣ 優先權最高：如果程式有拋出 Error，或是你在 setLog 手動指定了等級
+    // 這樣即使是 400，只要有 Error 物件或是手動指定，都會是 error
+    if (error || locals?.logLevel === 'error' || res.statusCode >= 500) return 'error'
 
-    // 2️⃣ 優先權次之：讀取你在 setLog 手動設定的等級
+    // 2️⃣ 優先權次之：讀取自定義的其他等級 (如 'info', 'warn' 等)
     if (locals?.logLevel) return locals.logLevel
 
-    // 3️⃣ 預設自動判斷：根據 HTTP 狀態碼
-    if (res.statusCode >= 400) return 'warn'
+    // 3️⃣ 預設自動判斷：將 400 區段從 warn 改為 error
+    if (res.statusCode >= 400) return 'error'
 
     return 'info'
   },
