@@ -84,6 +84,9 @@ const currentLevel = isDevelopment ? 'debug' : 'info'
 // =======================================================
 const logDir = path.join(process.cwd(), 'logs')
 
+// *避免在 Vercel 部署失敗
+// ~ 只有在「非生產環境」下才嘗試建立 logs 目錄，
+// ~生產環境（如 Vercel）不需要也無法建立
 if (!isProd) {
   try {
     if (!fs.existsSync(logDir)) {
@@ -173,6 +176,9 @@ const consoleStream = pretty({
   sync: true,
 })
 
+// 偵測目前是不是在 Jest 或 Vitest 測試環境下
+const isTestEnv = typeof jest !== 'undefined' || typeof vi !== 'undefined'
+
 // 🚀 修改重點：動態建立 streams 陣列
 const streams = [
   {
@@ -181,8 +187,8 @@ const streams = [
   },
 ]
 
-// 只有在非生產環境（例如 Local）才加上檔案記錄功能
-if (!isProd) {
+// ~只有在「非生產環境」且「不是測試環境」時，才加上檔案記錄功能
+if (!isProd && !isTestEnv) {
   streams.push({
     level: currentLevel,
     stream: pino.transport({
