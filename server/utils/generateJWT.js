@@ -3,10 +3,14 @@ import jwt from 'jsonwebtoken'
 import { getConfig } from '../config/index.js'
 
 // 取得環境設定
-const JWT_SECRET = getConfig('secret.jwtSecret')
-const JWT_EXPIRES_IN = getConfig('secret.jwtExpiresDay')
+// const JWT_SECRET = getConfig('secret.jwtSecret')
+// const JWT_EXPIRES_IN = getConfig('secret.jwtExpiresDay')
 
 export const signToken = (payload) => {
+  // 取得環境設定
+  const JWT_SECRET = getConfig('secret.jwtSecret')
+  const JWT_EXPIRES_IN = getConfig('secret.jwtExpiresDay')
+
   // 1. 防呆機制：確保密鑰存在，避免簽發出無效或不安全的 Token
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in config')
@@ -22,11 +26,13 @@ export const signToken = (payload) => {
   return jwt.sign(payload, JWT_SECRET, options)
 }
 export const verifyToken = (token) => {
+  // 取得環境設定
+  const JWT_SECRET = getConfig('secret.jwtSecret')
+
   try {
     // 驗證並回傳解碼後的資料
     return jwt.verify(token, JWT_SECRET)
-  } 
-  catch (error) {
+  } catch (error) {
     // 統一錯誤處理邏輯
     throw new Error(error.message || 'Invalid or expired token')
   }
