@@ -9,12 +9,15 @@ import corsOptions from '../server/utils/cors.js'
 import chalk from 'chalk'
 import path from 'path'
 import cookieParser from 'cookie-parser'
+import connectDB from '../db/connection.js'
+// Router
 import indexRouter from '../server/routes/index.js'
 import userRouter from '../server/routes/user.js'
 import roomRouter from '../server/routes/room.js'
 import tokenRouter from '../server/routes/token.js'
+import articleRouter from '../server/routes/article.js'
 import errorRouter from '../server/routes/error.js'
-import connectDB from '../db/connection.js'
+// { }
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { handleNotFound , handleGlobalError } from '../server/middlewares/errorHandler.js'
 import { httpLogger } from '../server/utils/logger.js'
@@ -234,6 +237,7 @@ const routes = [
   { path: '/users', router: userRouter },
   { path: '/rooms', router: roomRouter },
   { path: '/token', router: tokenRouter },
+  { path: '/article', router: articleRouter },
 ]
 environments.forEach((env) => {
   routes.forEach((route) => {

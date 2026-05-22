@@ -13,3 +13,6 @@ export * from './operations/user/remove.delete.js'
 // people
 export * from './operations/people/index.get.js'
 export * from './operations/people/create.post.js'
+
+// article
+export * from './operations/article/index.get.js'
