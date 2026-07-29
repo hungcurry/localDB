@@ -19,7 +19,7 @@ import articleRouter from '../server/routes/article.js'
 import errorRouter from '../server/routes/error.js'
 // { }
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
-import { handleNotFound , handleGlobalError } from '../server/middlewares/errorHandler.js'
+import { handleNotFound, handleGlobalError } from '../server/middlewares/errorHandler.js'
 import { httpLogger } from '../server/utils/logger.js'
 import { parse } from 'url'
 import { createServer } from 'http'
@@ -140,10 +140,12 @@ const mongoURIs = {
 }
 const defaultDbMap = {
   // 根據不同的 path 選擇對應的 Databases
+  // *開發環境dev
   // api: 'prodDB',
   // api2: 'devDB',
   // api3: 'testDB',
 
+  // *正式環境prod
   api: 'nuxt3-test',
   api2: 'nuxt3-test',
   api3: 'nuxt3-test',

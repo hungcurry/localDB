@@ -1,34 +1,39 @@
 
 #### 本機開發
+
 ```jsx
+// .env-dev
+MONGO_URI_PROD=mongodb://127.0.0.1:27017/prodDB
+MONGO_URI_DEV=mongodb://127.0.0.1:27017/devDB
+MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
+
+
 // api/index.js 改
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
+  // *開發環境dev
   api: 'prodDB',
   api2: 'devDB',
   api3: 'testDB',
 
+  // *正式環境prod
   // api: 'nuxt3-test',
   // api2: 'nuxt3-test',
   // api3: 'nuxt3-test',
 }
 
 // client/js/index.js 改
+// ---
+// * 註冊帳號 ( 開發環境 )
+// ooopp42@gmail.com
+// curry
+// 1234
 
 // * 正式環境
 // let URL = 'https://local-db.vercel.app/api2'
 
 // * 開發環境
 let URL = 'http://localhost:3000/api2'
-// * 註冊帳號 ( 開發環境 )
-// ooopp42@gmail.com
-// curry
-// 1234
-
-// .env-dev
-MONGO_URI_PROD=mongodb://127.0.0.1:27017/prodDB
-MONGO_URI_DEV=mongodb://127.0.0.1:27017/devDB
-MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
 ```
 
 #### handleAsyncError 原理
@@ -54,7 +59,6 @@ const someController = async function (req, res, next) {
 }
 export { someController }
 ```
-
 
 > 使用 handleAsyncError後
 ```jsx
@@ -93,9 +97,8 @@ const someController = async (req, res, next) => {
 export { someController }
 ```
 
-
-
 #### 公司localhost 無法連線 MongoDB原因
+
 ```jsx
 // MongoDB 對接口 : TCP 27017
 // pwsh

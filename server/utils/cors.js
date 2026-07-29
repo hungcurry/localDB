@@ -21,6 +21,7 @@ import cors from 'cors'
 // 允許跨域存取的白名單網址
 const whitelist = [
   // 本機開發環境
+  'http://127.0.0.1:5500',
   'http://127.0.0.1:8080',
   'http://localhost:3000',
   'http://localhost:5173',

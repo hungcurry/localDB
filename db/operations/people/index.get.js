@@ -1,18 +1,17 @@
 import { PeopleModel } from '../../models/people.model.js'
 
 // 查詢人員數據
-const aggregatePeople = async () => {
+const handleAggregate = async () => {
   return await PeopleModel.aggregate([
     {
       $project: { __v: 0 },
     },
   ])
 }
-
 // 查詢文檔
 const getDBPeople = async () => {
   try {
-    const people = await aggregatePeople()
+    const people = await handleAggregate()
 
     if (process.env.NODE_ENV === 'dev') {
       console.log('MongoDB')

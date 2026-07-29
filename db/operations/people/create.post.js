@@ -5,7 +5,7 @@ const postDBPeople = async (peopleData) => {
     const newPerson = new PeopleModel(peopleData)
     await newPerson.save()
     console.log('DB People saved:', newPerson)
-    
+
     return newPerson // 返回新保存的人
   } 
   catch (err) {

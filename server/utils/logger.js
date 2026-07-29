@@ -59,14 +59,14 @@ import { pinoHttp } from 'pino-http'
 import { AsyncLocalStorage } from 'async_hooks'
 
 /** 這份檔案 只適合用在 Serverless 環境（例如 Vercel）使用
- * 
+ *
  *  * 注意事項
- *  Zeabur（傳統伺服器/容器架構） 
+ *  Zeabur（傳統伺服器/容器架構）
  *  Vercel（Serverless 無伺服器架構）
  *  ---
  *  Vercel 的 Serverless Function 環境不允許持久化儲存 Log 檔案。
  *  這與 Zeabur 或一般傳統 Server（如 VPS、虛擬主機）有本質上的不同。
- * 
+ *
  */
 
 // 建立一個存放 Response 物件的保險箱

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs' // 密碼加密
 import { v4 as uuidv4 } from 'uuid'
 import { getConfig } from '../config/index.js'
-import { signToken , verifyToken } from '../utils/generateJWT.js'
+import { signToken, verifyToken } from '../utils/generateJWT.js'
 
 // 用於存儲 token 及其有效期
 const tokens = {}
@@ -207,9 +207,7 @@ const checkJWTAuthorization = (req, res, next) => {
   const authHeader = req.headers['authorization']
 
   // 從 "Bearer <token>" 中分割提取 token
-  const token = authHeader?.startsWith('Bearer ') 
-      ? authHeader.split(' ')[1] 
-      : null
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
   console.log(`Received token: ${token}`)
 
   // 1. 驗證用戶有送token

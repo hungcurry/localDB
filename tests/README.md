@@ -1,6 +1,5 @@
-我之前寫 都是類似這樣...
-
 #### 單元測試
+
 ```jsx
 // 單元測試
 const mockData = {
@@ -19,6 +18,7 @@ console.log(result.data) // mockData
 ```
 
 #### Express API 整合測試
+
 ```jsx
 // Express API 整合測試 (API Integration Testing)
 import request from 'supertest'
@@ -75,8 +75,8 @@ describe('測試元件📅-User控制器', () => {
 })
 ```
 
-
 #### .jest.fn 相等語法整理
+
 ```jsx
 describe('測試元件📅-vi.fn() 的基本用法', () => {
   it('vi.fn()', async () => {

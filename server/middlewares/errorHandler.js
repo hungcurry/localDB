@@ -59,9 +59,9 @@ const handleNotFound = (req, res, next) => {
  * ~寫法 B：在定義函式時就包好 (更推薦，乾淨很多)
  * const checkJWT = Asyncwrap(async (req, res, next) => { ... })
  * const handlePostUser = Asyncwrap(async (req, res) => { ... })
- * 
+ *
  * ~router.get('/', checkJWT, handlePostUser)
- * 
+ *
  * * handleAsyncError 的作用：
  * 主要功能：它用來捕捉異步函數（例如 async 和 await 函數）中的錯誤。
  * Express 本身無法自動捕捉非同步錯誤，

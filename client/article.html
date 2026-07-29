@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>localDB-分頁</title>
+</head>
+
+<style>
+  .article-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: sans-serif;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .search-bar input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .search-bar button {
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+
+  .article-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    text-transform: capitalize;
+  }
+
+  .badge.published {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .badge.draft {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  .status-info {
+    color: #666;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .status-error {
+    color: #dc3545;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .no-data {
+    color: #999;
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  button:disabled {
+    idleness: text;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+</style>
+
+<body>
+  <div class="article-container">
+    <!-- 1. 搜尋列 -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="請輸入關鍵字搜尋標題..." />
+      <button id="searchBtn">搜尋</button>
+    </div>
+
+    <!-- 2. 狀態提示區（載入中、錯誤訊息） -->
+    <div id="statusMessage" class="status-info" style="display: none"></div>
+
+    <!-- 3. 資料列表呈現區 -->
+    <div id="listWrapper"></div>
+
+    <!-- 4. 分頁控制軸 -->
+    <div id="paginationWrapper" class="pagination-wrapper" style="display: none">
+      <button id="prevBtn">上一頁</button>
+      <span id="pageIndicator"></span>
+      <button id="nextBtn">下一頁</button>
+    </div>
+  </div>
+</body>
+
+<script type="module" src="./js/article.js"></script>
+
+</html>

@@ -17,10 +17,10 @@ const loginExp = document.getElementById('login-exp')
 // ===================
 let token = ''
 // * 正式環境
-let URL = 'https://local-db.vercel.app/api2'
+// let URL = 'https://local-db.vercel.app/api2'
 
 // * 開發環境
-// let URL = 'http://localhost:3000/api2'
+let URL = 'http://localhost:3000/api2'
 
 // http://localhost:3000/api/users   => prodDB
 // http://localhost:3000/api2/users  => devDB
@@ -54,8 +54,7 @@ const handleSignup = async (e) => {
       const errorData = await response.json()
       console.log(`註冊失敗：${errorData.message}`)
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.error('註冊錯誤：', error)
     console.log('註冊過程中發生錯誤，請稍後再試。')
   }
@@ -85,8 +84,7 @@ const handleLogin = async (e) => {
       const errorData = await response.json()
       console.log(`登入失敗：${errorData.message}`)
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.error('登入錯誤：', error)
     console.log('登入過程中發生錯誤，請稍後再試。')
   }
@@ -122,8 +120,7 @@ const fetchCheckJwtToken = async () => {
       // }
       // console.log('--------')
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.error('API 請求錯誤:', error)
   }
 }
@@ -162,8 +159,7 @@ const fetchCheckToken = async () => {
     const data = await response.json()
     console.log('API 回應資料:', data)
     console.log('--------')
-  } 
-  catch (error) {
+  } catch (error) {
     console.error('API 請求錯誤:', error)
   }
 }
