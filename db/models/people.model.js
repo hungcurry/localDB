@@ -28,6 +28,7 @@ const peopleSchema = new mongoose.Schema(
   },
   // 第二個參數：放設定選項（如 timestamps）
   {
+    collection: 'People',
     // timestamps: true 會自動在資料庫中添加 createdAt 和 updatedAt 欄位，
     // 並在每次創建或更新文檔時自動管理這些欄位的值。
     timestamps: true,
@@ -38,6 +39,6 @@ const peopleSchema = new mongoose.Schema(
 )
 
 // 創建模型
-//                                    模型名稱      資料結構    Collection資料表
-const PeopleModel = mongoose.model('PeopleModel', peopleSchema, 'People')
+//                                    模型名稱       資料結構
+const PeopleModel = mongoose.model('PeopleModel', peopleSchema)
 export { PeopleModel }

@@ -8,7 +8,7 @@ MONGO_URI_DEV=mongodb://127.0.0.1:27017/devDB
 MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
 
 
-// api/index.js 改
+// api/api.js 改
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
   // *開發環境dev

@@ -1,0 +1,18 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb_Docker
+    # 開發環境建議用 unless-stopped，避免電腦一開機就在背景默默吃資源
+    restart: unless-stopped
+    ports:
+    # 建議改用 27019，格式為 "本機Port:容器內Port"
+      - "27019:27017"
+    # 指定讀取 .env.dev 檔案
+    env_file:
+      - .env.dev
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+    name: localDB_Docker
