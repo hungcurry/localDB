@@ -2,13 +2,17 @@
 #### 本機開發
 
 ```jsx
+// ===================
 // .env-dev
+// ===================
 MONGO_URI_PROD=mongodb://127.0.0.1:27017/prodDB
 MONGO_URI_DEV=mongodb://127.0.0.1:27017/devDB
 MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
 
 
-// api/api.js 改
+// ===================
+// api/api.js
+// ===================
 const defaultDatabases = {
   // 根據不同的 path 選擇對應的 Databases
   // *開發環境dev
@@ -22,8 +26,10 @@ const defaultDatabases = {
   // api3: 'nuxt3-test',
 }
 
-// client/js/index.js 改
-// ---
+
+// ===================
+// client/js/index.js
+// ===================
 // * 註冊帳號 ( 開發環境 )
 // ooopp42@gmail.com
 // curry
@@ -34,6 +40,42 @@ const defaultDatabases = {
 
 // * 開發環境
 let URL = 'http://localhost:3000/api2'
+```
+
+#### 多資料庫 注意事項
+
+> 資料庫
+
+```jsx
+// 這寫法：Model 通常直接綁死在預設的資料庫連線(單一資料庫)
+// 單一資料庫 這輸出 出去 就是實體 直接操作方法xx.find()..
+export const allModels = [
+  // === 無關連表 ===
+  UserModel,
+  PeopleModel,
+  ArticleModel,
+  // === 父表 (主表) ===
+  // === 子表 (從表) ===
+]
+
+// *多資料庫
+// 1. 導出的只是一組藍圖設定（純資料）
+export const allEntities = [
+  { name: 'User', schema: userSchema },
+  { name: 'Article', schema: articleSchema },
+]
+
+// 2. 根據不同租戶（Tenant）動態綁定連線
+const connA = mongoose.createConnection('mongodb://.../tenantA_db')
+const connB = mongoose.createConnection('mongodb://.../tenantB_db')
+
+// 3. 用「同一張藍圖」在「不同資料庫」建立各自獨立的 Model
+const TenantA_UserModel = connA.model(allEntities[0].name, allEntities[0].schema)
+const TenantB_UserModel = connB.model(allEntities[0].name, allEntities[0].schema)
+
+// 4. 操作時完全隔離！
+await TenantA_UserModel.create({ name: 'Alice' }) // 寫入 tenantA_db
+await TenantB_UserModel.create({ name: 'Bob' })   // 寫入 tenantB_db
 ```
 
 #### handleAsyncError 原理

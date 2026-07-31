@@ -86,4 +86,4 @@ articleSchema.index({ title: 1 })
 // 創建模型
 //                                     模型名稱        資料結構
 const ArticleModel = mongoose.model('ArticleModel', articleSchema)
-export { ArticleModel }
+export { articleSchema, ArticleModel }

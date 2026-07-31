@@ -41,4 +41,4 @@ const peopleSchema = new mongoose.Schema(
 // 創建模型
 //                                    模型名稱       資料結構
 const PeopleModel = mongoose.model('PeopleModel', peopleSchema)
-export { PeopleModel }
+export { peopleSchema, PeopleModel }

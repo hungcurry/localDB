@@ -36,4 +36,4 @@ const userSchema = new mongoose.Schema(
 // 創建模型
 //                                模型名稱      資料結構
 const UserModel = mongoose.model('UserModel', userSchema)
-export { UserModel }
+export { userSchema, UserModel }

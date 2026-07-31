@@ -141,14 +141,14 @@ const mongoURIs = {
 const defaultDbMap = {
   // 根據不同的 path 選擇對應的 Databases
   // *開發環境dev
-  api: 'prodDB',
-  api2: 'devDB',
-  api3: 'testDB',
+  // api: 'prodDB',
+  // api2: 'devDB',
+  // api3: 'testDB',
 
   // *正式環境prod
-  // api: 'nuxt3-test',
-  // api2: 'nuxt3-test',
-  // api3: 'nuxt3-test',
+  api: 'nuxt3-test',
+  api2: 'nuxt3-test',
+  api3: 'nuxt3-test',
 }
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行
