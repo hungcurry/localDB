@@ -29,39 +29,51 @@ import { articleSchema } from './article.model.js'
 // === 子表 (從表) ===
 
 // ==============================
-// 3. 打包成全域陣列，供 Seed 使用
+// 3. 單一資料庫 產生清空使用
 // ==============================
-// 這寫法：Model 通常直接綁死在預設的資料庫連線(單一資料庫)
-export const allModels = [
-  // === 無關連表 ===
-  UserModel,
-  PeopleModel,
-  ArticleModel,
-  // === 父表 (主表) ===
-  // === 子表 (從表) ===
-]
+// 單一資料庫：直接用 Model
+// 因為只有一個資料庫，所以 Model 一建立就固定綁定那個 Connection
+// 例如：const UserModel = mongoose.model('UserModel', userSchema)
+// 之後整個專案都用
+// UserModel.find()
+// ----------------------------
+// export const allModels = [
+//   // === 無關連表 ===
+//   UserModel,
+//   PeopleModel,
+//   ArticleModel,
+//   // === 父表 (主表) ===
+//   // === 子表 (從表) ===
+// ]
 
 // ==============================
 // 4. 多資料庫 產生清空使用
 // ==============================
-// *多個資料庫 用這種 藍圖 寫法
+// *多資料庫：不能直接用 Model
+// *使用 共用同一份 Schema 去產生每個資料庫建立自己的 Model
 export const allEntities = [
+  // === 無關連表 ===
   {
-    name: 'User',
+    name: 'UserModel',
+    collectionName: 'User',
     schema: userSchema,
   },
   {
-    name: 'People',
+    name: 'PeopleModel',
+    collectionName: 'People',
     schema: peopleSchema,
   },
   {
-    name: 'Article',
+    name: 'ArticleModel',
+    collectionName: 'Article',
     schema: articleSchema,
   },
+  // === 父表 (主表) ===
+  // === 子表 (從表) ===
 ]
 // 開發模式本地開發（isDev）Entity 白名單（保留手動測試資料）
 export const keepEntities = new Set([
-  'User',
-  // 'People',
-  // 'Article',
+  'UserModel',
+  // 'PeopleModel',
+  // 'ArticleModel',
 ])

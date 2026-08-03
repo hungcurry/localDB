@@ -47,8 +47,11 @@ let URL = 'http://localhost:3000/api2'
 > 資料庫
 
 ```jsx
-// 這寫法：Model 通常直接綁死在預設的資料庫連線(單一資料庫)
-// 單一資料庫 這輸出 出去 就是實體 直接操作方法xx.find()..
+// 單一資料庫：直接用 Model
+// 因為只有一個資料庫，所以 Model 一建立就固定綁定那個 Connection
+// 例如：const UserModel = mongoose.model('UserModel', userSchema)
+// 之後整個專案都用
+// UserModel.find()
 export const allModels = [
   // === 無關連表 ===
   UserModel,
@@ -58,8 +61,9 @@ export const allModels = [
   // === 子表 (從表) ===
 ]
 
-// *多資料庫
-// 1. 導出的只是一組藍圖設定（純資料）
+// *多資料庫：不能直接用 Model
+// *藍圖概念
+// *使用 共用同一份 Schema 去產生每個資料庫建立自己的 Model
 export const allEntities = [
   { name: 'User', schema: userSchema },
   { name: 'Article', schema: articleSchema },

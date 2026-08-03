@@ -18,6 +18,7 @@ import tokenRouter from '../server/routes/token.js'
 import articleRouter from '../server/routes/article.js'
 import errorRouter from '../server/routes/error.js'
 // { }
+import { getConfig } from '../server/config/index.js'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { handleNotFound, handleGlobalError } from '../server/middlewares/errorHandler.js'
 import { httpLogger } from '../server/utils/logger.js'
@@ -26,8 +27,13 @@ import { createServer } from 'http'
 import { wss1, wss2 } from '../server/routes/ws.js'
 // #endregion
 
-const post = 3000
-if (process.env.NODE_ENV === 'dev') {
+const PORT = getConfig('server.port') || 3000
+const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
+const isProd = nodeEnv === 'production'
+const isDev = nodeEnv === 'dev'
+const isTest = nodeEnv === 'test'
+
+if (isDev) {
   console.log(`------`)
   console.log(`Server : api/index.js`)
   console.log('當前環境:', process.env.NODE_ENV)
@@ -37,7 +43,7 @@ if (process.env.NODE_ENV === 'dev') {
   console.log('MONGO_URI:', process.env.MONGO_URI_DEV)
   // http://localhost:3000/api/users
   // http://localhost:3000/api-docs  查看生成的 API 文檔
-  console.log(`Server running on http://localhost:${post}`)
+  console.log(`Server running on http://localhost:${PORT}`)
 }
 
 // ===================
@@ -131,24 +137,23 @@ const mongoURIs = {
   // api2: 'mongodb://127.0.0.1:27017/',
   // api3: 'mongodb://127.0.0.1:27017/',
 
-  // api: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
-  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
+  // api: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
+  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
   // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
   api: process.env.MONGO_URI_PROD,
   api2: process.env.MONGO_URI_DEV,
   api3: process.env.MONGO_URI_TEST,
 }
 const defaultDbMap = {
-  // 根據不同的 path 選擇對應的 Databases
   // *開發環境dev
   // api: 'prodDB',
   // api2: 'devDB',
   // api3: 'testDB',
 
-  // *正式環境prod
-  api: 'nuxt3-test',
-  api2: 'nuxt3-test',
-  api3: 'nuxt3-test',
+  // 開發環境使用 devDB，其餘環境 (prod / test) 使用 nuxt3-test
+  api: isDev ? 'prodDB' : 'nuxt3-test',
+  api2: isDev ? 'devDB' : 'nuxt3-test',
+  api3: isDev ? 'testDB' : 'nuxt3-test',
 }
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行

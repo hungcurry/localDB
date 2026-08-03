@@ -9,6 +9,9 @@ import { seedMockData } from '../server/seeds/index.js'
 const server = http.createServer(app)
 const PORT = getConfig('server.port') || 3000
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
+const isProd = nodeEnv === 'production'
+const isDev = nodeEnv === 'dev'
+const isTest = nodeEnv === 'test'
 
 // 定義各環境配置 Mapping
 const envDbMap = {
@@ -55,9 +58,13 @@ const initDatabases = async () => {
       const db = mongooseInstance.connection.useDb(dbName).db
 
       if (db) {
-        // 動態使用 allEntities 中的 entity.name，取代原本硬寫的 ['User', 'Article', 'People']
         for (const entity of allEntities) {
-          await db.createCollection(entity.name).catch((err) => {
+          // 💡 【修改處】：取真正的 Collection 名稱 ('User', 'People', 'Article')
+          // 避免拿 entity.name ('UserModel') 去建立資料表
+          const targetCollection =
+            entity.collectionName || entity.schema?.get('collection') || entity.name.replace(/Model$/, '')
+
+          await db.createCollection(targetCollection).catch((err) => {
             // Error code 48: NamespaceExists (Collection 已存在則忽略)
             if (err.code !== 48) {
               throw err
@@ -77,9 +84,6 @@ const startServer = async () => {
     // 步驟 1: 啟動時先連線並初始化 3 個 DB
     await initDatabases()
 
-    const isProd = nodeEnv === 'production'
-    const isDev = nodeEnv === 'dev'
-    const isTest = nodeEnv === 'test'
     // 步驟 2: 執行假資料寫入
     if (isDev) {
       await seedMockData()
