@@ -3,57 +3,59 @@ import chalk from 'chalk'
 
 let isEventRegistered = false
 
+/**
+ * 建立/切換全域 MongoDB 主連線
+ * @param {string} dbURI - MongoDB 連線字串 (例如 mongodb://localhost:27017)
+ * @param {string} database - 目標資料庫名稱
+ */
 const connectDB = async (dbURI, database) => {
   try {
-    // 1. 取得當前已連線的資料庫名稱與主機
-    const currentDB = mongoose.connection.db?.databaseName
     const isConnected = mongoose.connection.readyState === 1
+    const currentDB = mongoose.connection.db?.databaseName
+    const currentHost = mongoose.connection.host
 
-    // 2. 判斷是否需要重新建立/切換連線
-    // 条件：未連線 OR 資料庫名稱不同 OR 連線 Host 不同
-    const needsNewConnection = !isConnected || currentDB !== database || mongoose.connection.host !== dbURI
-
-    // 3. 如果已經連線且資料庫完全一致，直接回傳，不重複連線
-    if (isConnected && !needsNewConnection) {
+    // 1. 如果已連線，且 URI 與資料庫名稱完全一致，直接返回，不重複處理
+    if (isConnected && currentDB === database && currentHost === dbURI) {
       return mongoose
     }
 
-    if (process.env.NODE_ENV === 'dev') {
+    if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
       console.log(chalk.cyan('------'))
       console.log(chalk.cyan('DB : connection.js'))
       console.log(chalk.cyan(`目前資料庫 => ${currentDB || '未連線'}`))
       console.log(chalk.cyan(`目標切換資料庫 => ${database}`))
     }
 
-    // 4. 如果已經連在舊的 DB，先切斷連線
+    // 2. 註冊全局斷開/錯誤監聽（僅一次）
+    if (!isEventRegistered) {
+      mongoose.connection.on('disconnected', () => {
+        console.log(chalk.yellow('⚠️ 資料庫連接已斷開'))
+      })
+      mongoose.connection.on('error', (err) => {
+        console.error(chalk.red('❌ 資料庫發生異常錯誤:'), err)
+      })
+      isEventRegistered = true
+    }
+
+    // 3. 若已經連線但資料庫不同，先切斷舊連線再連新的
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect()
-      if (process.env.NODE_ENV === 'dev') {
+      if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
         console.log(chalk.yellow(`已斷開舊資料庫連線: ${currentDB}`))
       }
     }
 
-    // 5. 重新連線至目標資料庫
+    // 4. 建立/切換至目標資料庫連線
     await mongoose.connect(dbURI, {
       dbName: database,
     })
 
     console.log(chalk.green(`✅ 已成功連接到資料庫: ${database}`))
-
-    // 註冊斷開連接事件（僅註冊一次）
-    if (!isEventRegistered) {
-      mongoose.connection.on('disconnected', () => {
-        console.log(chalk.yellow('⚠️ 資料庫連接已斷開'))
-      })
-      isEventRegistered = true
-    }
-
     return mongoose
-  } 
-  catch (err) {
+  } catch (err) {
     console.error(chalk.red('❌ 資料庫連接錯誤:'), err)
     throw err
   }
 }
 
-export default connectDB
+export { connectDB }
