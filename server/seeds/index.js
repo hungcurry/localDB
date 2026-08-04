@@ -77,11 +77,7 @@ function getModelsForDb(dbName) {
   return models
 }
 async function clearDatabaseTables(dbName, modelsMap) {
-  // .useDb(dbName) : 切換目標資料庫 useDb('devDB')
-  // { useCache: true } : 開啟連線快取機制
-  // db：是你透過 mongoose.connection.useDb('devDB') 切換出來的指定資料庫連線實體
-  const db = mongoose.connection.useDb(dbName, { useCache: true })
-
+  
   // * 跟TS版本node-zeabur-mongo１不同 (單資料庫)
   // * 這邊 allEntities 出來是 藍圖 所以 還要多轉一層變models
   // 要清空的 Entities : 傳入結構：每個元素是 { name, schema }

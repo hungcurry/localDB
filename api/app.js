@@ -1,13 +1,9 @@
 // #region import
-// ~基本方式 只有一種環境變數
-// import 'dotenv/config' // 確保第一行加載環境變數
-// ~進階方式 根據不同環境NODE_ENV,加載不同的 .env 檔案
-import '../server/config/env.js' // 確保第一行加載環境變數
 import express from 'express'
 import cors from 'cors'
 import corsOptions from '../server/utils/cors.js'
-import chalk from 'chalk'
 import path from 'path'
+import chalk from 'chalk'
 import cookieParser from 'cookie-parser'
 import connectDB from '../db/connection.js'
 // Router
@@ -18,13 +14,13 @@ import tokenRouter from '../server/routes/token.js'
 import articleRouter from '../server/routes/article.js'
 import errorRouter from '../server/routes/error.js'
 // { }
+import { parse } from 'url'
+import { wss1, wss2 } from '../server/routes/ws.js'
 import { getConfig } from '../server/config/index.js'
+import { httpLogger } from '../server/utils/logger.js'
+import { createServer } from 'http'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { handleNotFound, handleGlobalError } from '../server/middlewares/errorHandler.js'
-import { httpLogger } from '../server/utils/logger.js'
-import { parse } from 'url'
-import { createServer } from 'http'
-import { wss1, wss2 } from '../server/routes/ws.js'
 // #endregion
 
 const PORT = getConfig('server.port') || 3000
@@ -33,24 +29,12 @@ const isProd = nodeEnv === 'production'
 const isDev = nodeEnv === 'dev'
 const isTest = nodeEnv === 'test'
 
-if (isDev) {
-  console.log(`------`)
-  console.log(`Server : api/index.js`)
-  console.log('當前環境:', process.env.NODE_ENV)
-  // console.log('API 路徑:', process.env.VITE_API);
-  // console.log('Base URL:', process.env.VITE_BASE_URL);
-  console.log('MONGO_ENV:', process.env.MONGO_ENV)
-  console.log('MONGO_URI:', process.env.MONGO_URI_DEV)
-  // http://localhost:3000/api/users
-  // http://localhost:3000/api-docs  查看生成的 API 文檔
-  console.log(`Server running on http://localhost:${PORT}`)
-}
-
 // ===================
 // ... CORS配置 ...
 // ===================
 const app = express()
 // 先處理跨域 (最優先)
+// 限定只有特定條件的前端才能存取 API
 app.use(cors(corsOptions))
 
 // ===================
@@ -90,7 +74,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join, resolve } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-// const viewsPath = join(__dirname, 'views')
+// 用現在檔案當起點，往上跳一層，再進 server/views
 const viewsPath = resolve(__dirname, '..', 'server', 'views')
 // view engine setup
 app.engine('ejs', ejsLocals)
@@ -115,17 +99,21 @@ app.set('view engine', 'ejs')
 // ===================
 // ... 中間件 ...
 // ===================
-// 解析 JSON (如 Axios，設定大小限制，防止惡意攻擊導致記憶體溢位)
-app.use(express.json({ limit: '10mb' }))
+// 解析 JSON (如 Axios，設定大小限制，防止攻擊導致記憶體溢位)
+app.use(express.json({ limit: '1mb' }))
 // 解析 Form (如藍新通知)
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-// 解析cookie (如 JWT token 存在 cookie 中，或是前端需要設置 cookie)
+app.use(express.urlencoded({ extended: true, limit: '1mb' }))
+// 解析cookie (如 JWT token 存在 cookie 中，
+// 自動只要發請求，瀏覽器自動夾帶 cookie，後端就能解析)
+// Header 方式 Authorization: Bearer <token> 就不用掛這個
 app.use(cookieParser())
 // 解析Logger 配置
 app.use(httpLogger)
 // 靜態文件中間件
-// 靜態文件服務，將 public 資料夾中的文件公開 不透過 express 路由
+// join: 用現在檔案當路徑，路徑直接合併'public'
 // app.use(express.static(path.join(__dirname, 'public')))
+// ---
+// resolve: 用現在檔案當起點，往上跳一層，再進 server/public
 const publicPath = resolve(__dirname, '..', 'server', 'public')
 app.use(express.static(publicPath))
 
@@ -158,7 +146,11 @@ const defaultDbMap = {
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行
 // 這邊新增後,下面Router的路徑也要記得加上去
-const excludedPaths = ['/', 'index', 'api-docs', 'error', 'favicon.ico', '.well-known', 'robots.txt']
+// prettier-ignore
+const excludedPaths = [
+  '/', 'index', 'api-docs', 'error', 
+  'favicon.ico', '.well-known', 'robots.txt'
+]
 app.use(async (req, res, next) => {
   try {
     /**
@@ -225,7 +217,8 @@ app.use(async (req, res, next) => {
     await connectDB(dbURI, finalDatabase)
 
     next()
-  } catch (err) {
+  } 
+  catch (err) {
     console.error('Failed to connect to database:', err)
     res.status(500).json({
       status: 'error',
@@ -252,12 +245,18 @@ environments.forEach((env) => {
   // 輸出結果
   // app.use('/api/users', userRouter);
   // app.use('/api/rooms', roomRouter);
+  // ....
   // app.use('/api2/users', userRouter);
   // app.use('/api2/rooms', roomRouter);
 })
+
+// app.get：直接定義單一路由
+// app.use：引入外部路由模組（Router
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' })
+})
 app.use(['/', '/index'], indexRouter)
 app.use('/error', errorRouter)
-
 // Swagger UI 提供靜態 API 文檔頁面
 // ~原本方式
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))

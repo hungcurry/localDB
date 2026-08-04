@@ -1,3 +1,7 @@
+// ~基本方式 只有一種環境變數
+// import 'dotenv/config' // 確保第一行加載環境變數
+// ~進階方式 根據不同環境NODE_ENV,加載不同的 .env 檔案
+import '../server/config/env.js' // 確保第一行加載環境變數
 import http from 'http'
 import connectDB from '../db/connection.js'
 import { app, mongoURIs, defaultDbMap } from './app.js'
@@ -13,6 +17,8 @@ const isProd = nodeEnv === 'production'
 const isDev = nodeEnv === 'dev'
 const isTest = nodeEnv === 'test'
 
+// 這是 Collection 已存在的錯誤碼
+const COLLECTION_EXISTS_ERROR = 48
 // 定義各環境配置 Mapping
 const envDbMap = {
   production: {
@@ -31,93 +37,142 @@ const envDbMap = {
     label: 'testDB',
   },
 }
-const initDatabases = async () => {
+// ==========================================
+// Utilities (輔助函式)
+// ==========================================
+// 從 Entity 解析真正的 Collection 名稱
+function getCollectionName(entity) {
+  // prettier-ignore
+  return entity.collectionName 
+  || entity.schema?.get('collection') 
+  || entity.name?.replace(/Model$/, '')
+}
+// 為指定的單一 Database 批量建立 Collections
+async function getModelsForDb(Instance, dbConfig, entities) {
+  const { dbName, label } = dbConfig
+  if (!dbName) return
+
+  // db：是你透過 mongoose.connection.useDb('devDB') 切換出來的指定資料庫連線實體
+  const db = Instance.connection.useDb(dbName, { useCache: true })
+  if (!db) {
+    throw new Error(`無法取得 [${label}] (DB: ${dbName}) 的連線實體`)
+  }
+
+  for (const entity of entities) {
+    const collectionName = getCollectionName(entity)
+    // 取得 Entity 對應的 Schema (依據你的專案結構調整，
+    // 若 entity 本身就是 Schema 則直接使用)
+    const schema = entity.schema || entity
+
+    try {
+      // 在指定連線實體上註冊/取得 Model
+      // 如果該 Model 已經在 connObj 上註冊過，優先使用已註冊的 Model
+      const Model = db.models[entity.name] || db.model(entity.name, schema, collectionName)
+
+      // 透過 Mongoose Model 建立 Collection
+      await Model.createCollection()
+    } catch (err) {
+      // Mongoose 內部通常會自動忽略 NamespaceExists (48) 錯誤，
+      // 但若是手動呼叫 createCollection 遇到例外時仍可保留保險檢查
+      if (err?.code !== COLLECTION_EXISTS_ERROR) {
+        throw err
+      }
+    }
+  }
+
+  console.log(`✅ 資料庫 [${label} / ${dbName}] Collections 初始化完成`)
+}
+
+// ==========================================
+// Database Initialization
+// ==========================================
+async function initDatabases() {
+  console.log('------')
   console.log(`🚀 開始初始化資料庫連線與 Collections... (當前環境: ${nodeEnv})`)
 
-  // 根據當前環境選擇主連線，預設退回 development (避免開發生態連到 prodDB)
-  const mainConfig = envDbMap[nodeEnv] || envDbMap.development
+  // 根據當前環境選擇主連線，預設退回 development
+  // ?? 只會判斷： undefined 和 null 所以 更比 ||更嚴井
+  const mainConfig = envDbMap[nodeEnv] ?? envDbMap.dev
 
-  if (!mainConfig || !mainConfig.uri) {
+  if (!mainConfig?.uri) {
     throw new Error(`[DB Error] 找不到對應環境 (${nodeEnv}) 的主要資料庫連線 URI`)
   }
 
   console.log(`📌 已選定主連線目標: [${mainConfig.label}] -> DB: ${mainConfig.dbName}`)
 
-  // 4. 建立主連線實體
-  const mongooseInstance = await connectDB(mainConfig.uri, mainConfig.dbName)
+  // 建立主連線實體
+  // 'mongodb://localhost:27017..' / 'devDB
+  const Instance = await connectDB(mainConfig.uri, mainConfig.dbName)
 
-  // 5. 需要被輪詢初始化的所有 DB Config 清單
-  const allDbConfigs = Object.values(envDbMap)
-
-  // 6. 透過 useDb 為所有指定的 DB 建立 Collections
-  for (const { dbName, label } of allDbConfigs) {
-    if (!dbName) continue
-
+  // 透過 useDb 為所有配置中的 DB 建立 Collections
+  for (const dbConfig of Object.values(envDbMap)) {
     try {
-      // 取得該 DB 的獨立連線實體
-      const db = mongooseInstance.connection.useDb(dbName).db
-
-      if (db) {
-        for (const entity of allEntities) {
-          // 💡 【修改處】：取真正的 Collection 名稱 ('User', 'People', 'Article')
-          // 避免拿 entity.name ('UserModel') 去建立資料表
-          const targetCollection =
-            entity.collectionName || entity.schema?.get('collection') || entity.name.replace(/Model$/, '')
-
-          await db.createCollection(targetCollection).catch((err) => {
-            // Error code 48: NamespaceExists (Collection 已存在則忽略)
-            if (err.code !== 48) {
-              throw err
-            }
-          })
-        }
-      }
-      console.log(`✅ 資料庫 [${label} / ${dbName}] Collections 初始化完成`)
-    } catch (err) {
-      console.error(`❌ 資料庫 [${label} / ${dbName}] 初始化失敗:`, err)
+      await getModelsForDb(Instance, dbConfig, allEntities)
+    } 
+    catch (err) {
+      console.error(`❌ 資料庫 [${dbConfig.label} / ${dbConfig.dbName}] 初始化失敗:`, err)
     }
+  }
+
+  return Instance
+}
+async function initSeedsData() {
+  // 依環境注入不同的 Seed 資料
+  if (isDev) {
+    await seedMockData()
+  }
+  if (isProd) {
+    // await seedProdData()
   }
 }
-// 啟動伺服器
-const startServer = async () => {
+async function startServer() {
+  let isDbInitialized = false
+
+  // 資料庫初始化與連線
   try {
-    // 步驟 1: 啟動時先連線並初始化 3 個 DB
     await initDatabases()
-
-    // 步驟 2: 執行假資料寫入
-    if (isDev) {
-      await seedMockData()
-    }
-
-    // 步驟 3: 啟動 HTTP 伺服器
-    server.listen(PORT, () => {
-      // *api
-      // http://localhost:3000/api/users
-      // http://localhost:3000/api/users/get-users
-
-      // *查看生成的 API 文檔
-      // http://localhost:3000/api-docs
-
-      // *websocket
-      // ws://localhost:3000/ws
-      // ws://localhost:3000/ws2
-
-      // *public
-      // http://localhost:3000/about.html
-      // http://localhost:3000/stylesheets/style.css
-
-      // *ejs模板首頁
-      // http://localhost:3000
-      // console.log(`Server running on http://localhost:${post}`)
-      console.log(`=================================`)
-      console.log(`🚀 Server running on http://localhost:${PORT}`)
-      console.log(`=================================`)
-    })
+    isDbInitialized = true
   } 
-  catch (error) {
-    console.error('❌ 伺服器啟動失敗:', error)
-    process.exit(1)
+  catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+
+    console.error(`❌ 資料庫初始化連線失敗: ${msg}`)
+    console.warn('⚠️ 伺服器將以「降級模式」啟動 (無資料庫連線)。')
   }
+
+  // 連線成功後，建立種子資料
+  if (isDbInitialized) {
+    try {
+      await initSeedsData()
+    } 
+    catch (err) {
+      console.error('⚠️ [DB-Seed] 假資料寫入失敗，但伺服器仍繼續啟動:', err)
+    }
+  }
+
+  // 啟動 HTTP 伺服器
+  server.listen(PORT, () => {
+    // *api
+    // http://localhost:3000/api/users
+    // http://localhost:3000/api/users/get-users
+
+    // *查看生成的 API 文檔
+    // http://localhost:3000/api-docs
+
+    // *websocket
+    // ws://localhost:3000/ws
+    // ws://localhost:3000/ws2
+
+    // *public
+    // http://localhost:3000/about.html
+    // http://localhost:3000/stylesheets/style.css
+
+    // *ejs模板首頁
+    // http://localhost:3000
+    console.log('=================================')
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log('=================================')
+  })
 }
 
 startServer()
