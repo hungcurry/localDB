@@ -2,12 +2,12 @@
 // import 'dotenv/config' // 確保第一行加載環境變數
 // ~進階方式 根據不同環境NODE_ENV,加載不同的 .env 檔案
 import '../server/config/env.js' // 確保第一行加載環境變數
+import app  from './app.js'
 import http from 'http'
 import mongoose from 'mongoose'
-import { app } from './app.js'
-import { getConfig } from '../server/config/index.js'
 import { connectDB } from '../db/connection.js'
-import { initDatabases, envDbMap } from '../db/initDatabases.js'
+import { getConfig } from '../server/config/index.js'
+import { initDatabases, envDbMap } from '../db/databases.js'
 // seeds資料
 import { seedMockData } from '../server/seeds/index.js'
 

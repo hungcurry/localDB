@@ -19,6 +19,7 @@ import { connectDB } from '../db/connection.js'
 import { getConfig } from '../server/config/index.js'
 import { httpLogger } from '../server/utils/logger.js'
 import { wss1, wss2 } from '../server/routes/ws.js'
+import { mongoURIs, defaultDbMap } from '../db/databases.js'
 import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from '../server/utils/swagger.js'
 import { handleNotFound, handleGlobalError } from '../server/middlewares/errorHandler.js'
 // #endregion
@@ -117,32 +118,10 @@ app.use(httpLogger)
 const publicPath = resolve(__dirname, '..', 'server', 'public')
 app.use(express.static(publicPath))
 
-// ======== MongoDB 連接 ===========
+// ===================
+// ... 動態 MongoDB 連接 ...
+// ===================
 // 根據請求的 URL 動態連接到對應的資料庫
-const mongoURIs = {
-  // 如果是用專案開環境 不同環境的對應 不同 MongoDB URI 前綴
-  // api: 'mongodb://127.0.0.1:27017/',
-  // api2: 'mongodb://127.0.0.1:27017/',
-  // api3: 'mongodb://127.0.0.1:27017/',
-
-  // api: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
-  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
-  // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
-  api: process.env.MONGO_URI_PROD,
-  api2: process.env.MONGO_URI_DEV,
-  api3: process.env.MONGO_URI_TEST,
-}
-const defaultDbMap = {
-  // *開發環境dev
-  // api: 'prodDB',
-  // api2: 'devDB',
-  // api3: 'testDB',
-
-  // 開發環境使用 devDB，其餘環境 (prod / test) 使用 nuxt3-test
-  api: isDev ? 'prodDB' : 'nuxt3-test',
-  api2: isDev ? 'devDB' : 'nuxt3-test',
-  api3: isDev ? 'testDB' : 'nuxt3-test',
-}
 // !排除的路徑陣列
 // 這些路徑不需要連接資料庫，直接放行
 // 這邊新增後,下面Router的路徑也要記得加上去
@@ -182,7 +161,7 @@ app.use(async (req, res, next) => {
     req.targetCollection = collection
 
     // dev log
-    if (process.env.NODE_ENV === 'dev') {
+    if (isDev) {
       const referer = req.headers.referer
       const isServerRequest = !referer || referer.includes(`localhost:${process.env.PORT || 3000}`)
 
@@ -195,12 +174,8 @@ app.use(async (req, res, next) => {
     }
 
     // DB mapping
-    const dbMap = {
-      api: mongoURIs.api,
-      api2: mongoURIs.api2,
-      api3: mongoURIs.api3,
-    }
-    const dbURI = dbMap[path]
+    // 防護：若找不到則退回預設環境 (mongoURIs.api2 : dev)
+    const dbURI = mongoURIs[path] || mongoURIs.api2
     // 得到 mongoURIs.api2 (連線到 dev 伺服器)
     const defaultDatabase = defaultDbMap[path]
     // 透過 defaultDbMap["api2"] 得到 "devDB"。
@@ -271,4 +246,4 @@ app.use(handleNotFound)
 // 使用錯誤處理中間件
 app.use(handleGlobalError)
 
-export { app, mongoURIs, defaultDbMap }
+export default app 
