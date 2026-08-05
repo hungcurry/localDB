@@ -29,10 +29,9 @@ async function initSeedsData() {
 }
 async function startServer() {
   let isDbConnected = false
-  const mainConfig = envDbMap[nodeEnv] ?? envDbMap.dev
-  // 專注建立資料庫主連線
   try {
-    await connectDB(mainConfig.uri, mainConfig.dbName)
+    await connectDB()
+    console.log('🚀 Starting server...')
     isDbConnected = true
   }
   catch (err) {
@@ -54,23 +53,6 @@ async function startServer() {
 
   // 啟動 HTTP 伺服器
   server.listen(PORT, () => {
-    // *api
-    // http://localhost:3000/api/users
-    // http://localhost:3000/api/users/get-users
-
-    // *查看生成的 API 文檔
-    // http://localhost:3000/api-docs
-
-    // *websocket
-    // ws://localhost:3000/ws
-    // ws://localhost:3000/ws2
-
-    // *public
-    // http://localhost:3000/about.html
-    // http://localhost:3000/stylesheets/style.css
-
-    // *ejs模板首頁
-    // http://localhost:3000
     console.log('=================================')
     console.log(`🚀 Server running on http://localhost:${PORT}`)
     console.log('=================================')

@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import corsOptions from '../src/utils/cors.js'
 import path from 'path'
+// 有顏色 console.log
 import chalk from 'chalk'
 import cookieParser from 'cookie-parser'
 // Router
@@ -168,8 +169,9 @@ app.use(async (req, res, next) => {
       const isServerRequest = !referer || referer.includes(`localhost:${process.env.PORT || 3000}`)
 
       if (path !== 'favicon.ico') {
-        console.log(isServerRequest ? '--- 伺服器請求 ---' : '--- 客戶端請求 ---')
-        console.log(path) // api2
+        console.log(chalk.cyan(isServerRequest ? '--- 伺服器請求 ---' : '--- 客戶端請求 ---'))
+        console.log('檔案 : app.js')
+        console.log(`API路徑 : ${path}`) // api2
         console.log('database =>', database)
         console.log('collection =>', collection)
       }

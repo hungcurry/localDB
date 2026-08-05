@@ -53,7 +53,9 @@ const envDbMap = {
     label: 'testDB',
   },
 }
-
+// ==========================================
+// Utilities (輔助函式)
+// ==========================================
 // 從 Entity 解析 Collection 名稱
 function getCollectionName(entity) {
   // prettier-ignore
@@ -62,31 +64,40 @@ function getCollectionName(entity) {
   || entity.name?.replace(/Model$/, '')
 }
 // 針對指定的單一 DB 建立所有對應的 Collections
-async function initCollectionsForDb(dbConfig, entities) {
+async function getModelsForDb(dbConfig, entities) {
   const { dbName, label } = dbConfig
   if (!dbName) return
 
-  // 透過 useDb 切換至指定資料庫實體（共用底層主連線）
-  const db = mongoose.connection.useDb(dbName, { useCache: true })
+  // db：是你透過 mongoose.connection.useDb('devDB') 切換出來的指定資料庫連線實體
+  const db = mongoose.connection.useDb(dbName, { useCache: true }) // devDB
 
   for (const entity of entities) {
     const collectionName = getCollectionName(entity)
+    // 取得 Entity 對應的 Schema (依據你的專案結構調整，
+    // 若 entity 本身就是 Schema 則直接使用)
     const schema = entity.schema || entity
 
     try {
+      // 在指定連線實體上註冊/取得 Model
+      // 如果該 Model 已經在 connObj 上註冊過，優先使用已註冊的 Model
       const Model = db.models[entity.name] || db.model(entity.name, schema, collectionName)
+      // 透過 Mongoose Model 建立 Collection
       await Model.createCollection()
     }
     catch (err) {
+      // Mongoose 內部通常會自動忽略 NamespaceExists (48) 錯誤，
+      // 但若是手動呼叫 createCollection 遇到例外時仍可保留保險檢查
       if (err?.code !== COLLECTION_EXISTS_ERROR) {
         throw err
       }
     }
   }
 
-  console.log(`✅ 資料庫 [${label} / ${dbName}] Collections 初始化完成`)
+  console.log(`✅ 資料庫 [ ${dbName} ] 的 Collections 初始化完成`)
 }
-// 初始化所有環境所需的 DB Collections
+// ==========================================
+// Database Init Collections
+// ==========================================
 const initDatabases = async () => {
   const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
 
@@ -95,13 +106,27 @@ const initDatabases = async () => {
 
   // 前置檢查：確保已先調用 connectDB()
   if (mongoose.connection.readyState !== 1) {
+    // 0：已斷線（Disconnected）
+    // 1：已連線（Connected）
+    // 2：連線中（Connecting）
+    // 3：斷線中（Disconnecting）
+    // --------------------------
+    // 意思是： 「只要不是『已連線』，通通算進來」
+    // 包含狀態： 0（已斷線）、2（連線中）、3（斷線中）。
     throw new Error('[DB Error] 必須先執行 connectDB() 建立主連線後才能初始化資料庫')
   }
 
+  const configAry = Object.values(envDbMap)
+  // [
+  //   { uri: '...', dbName: '...', label: 'prodDB' },
+  //   { uri: '...', dbName: '...', label: 'devDB' },
+  //   { uri: '...', dbName: '...', label: 'testDB' }
+  // ]
   // 遍歷所有配置，依序初始化 Collections
-  for (const dbConfig of Object.values(envDbMap)) {
+  for (const dbConfig of configAry) {
     try {
-      await initCollectionsForDb(dbConfig, allEntities)
+      // 傳入設定檔案 / 與Schema藍圖檔案，建立對應的 Collections
+      await getModelsForDb(dbConfig, allEntities)
     }
     catch (err) {
       console.error(`❌ 資料庫 [${dbConfig.label} / ${dbConfig.dbName}] 初始化失敗:`, err)

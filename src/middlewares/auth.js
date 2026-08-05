@@ -16,7 +16,7 @@ const utilLogRequest = (req) => {
   const clientFrom = req.headers['x-client-from']
   const authHeader = req.headers['authorization']
   console.log(`------`)
-  console.log(`Server : mid/auth.js`)
+  console.log(`檔案: mid/auth.js`)
   // 如：http://127.0.0.1:8080/
   // console.log(req.headers);
   // 範例請求req網址: http://localhost:3000/api/users/get-users?room=555
@@ -240,7 +240,7 @@ const checkJWTAuthorization = (req, res, next) => {
 
     // 5. 驗證成功，繼續下一個 middleware
     next()
-  } 
+  }
   catch (error) {
     // 6. 錯誤處理：區分過期或其他錯誤
     const isExpired = error.message.includes('expired')

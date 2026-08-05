@@ -24,6 +24,39 @@ docker-compose down -v
 docker-compose ps
 ```
 
+> 檔案順序
+
+```jsx
+// npm run dev
+初始流程: index.js => conn.js  => databases.js
+
+// 因為走API 會先從 Router(app.js) 觸發
+API流程:  app.js => conn.js => auth.js
+```
+
+> 網址
+
+```jsx
+// *api
+http://localhost:3000/api/users
+http://localhost:3000/api/users/get-users
+
+// *查看生成的 API 文檔
+http://localhost:3000/api-docs
+
+// *websocket
+ws://localhost:3000/ws
+ws://localhost:3000/ws2
+
+// *public
+http://localhost:3000/about.html
+http://localhost:3000/stylesheets/style.css
+
+// *ejs模板首頁
+http://localhost:3000
+
+```
+
 #### 本機開發
 
 > 檔案修改

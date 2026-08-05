@@ -77,7 +77,7 @@ function getModelsForDb(dbName) {
   return models
 }
 async function clearDatabaseTables(dbName, modelsMap) {
-  
+
   // * 跟TS版本node-zeabur-mongo１不同 (單資料庫)
   // * 這邊 allEntities 出來是 藍圖 所以 還要多轉一層變models
   // 要清空的 Entities : 傳入結構：每個元素是 { name, schema }
@@ -107,10 +107,11 @@ async function clearDatabaseTables(dbName, modelsMap) {
 // 初始化所有目標資料庫 (devDB, prodDB, testDB)
 export async function seedMockData() {
   try {
-    console.log('🌱 開始初始化 3 個目標資料庫 (devDB, prodDB, testDB)...')
+    console.log('\n')
+    console.log('🌱 開始 Seeds 3 個目標資料庫 (devDB, prodDB, testDB)...')
 
     for (const dbName of All_DATABASES) {
-      console.log(`\n----------------------------------------`)
+      console.log(`----------------------------------------`)
       console.log(`📦 正在處理資料庫: [${dbName}]`) // devDB
 
       // 1. 先統一取得該 DB 的 Models 實體 Map
@@ -154,9 +155,9 @@ export async function seedMockData() {
       // const devModels = getModelsForDb('devDB')
       // await devModels.User.find() // 👉 跑去 devDB 查 User 資料
       // prettier-ignore
-      const { 
-        UserModel, 
-        PeopleModel, 
+      const {
+        UserModel,
+        PeopleModel,
         ArticleModel,
       } = modelsMap // devDB
 
@@ -204,7 +205,7 @@ export async function seedMockData() {
     }
 
     console.log('\n🎉 所有資料庫 (devDB, prodDB, testDB) 初始化完成！')
-  } 
+  }
   catch (err) {
     console.error('❌ 寫入 Seed 資料失敗:', err)
     throw err
