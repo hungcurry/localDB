@@ -1,9 +1,18 @@
+# .editorconfig只管跨編輯器的「基礎縮排與檔案格式」
+# ---------------------
 [*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue,css,scss,sass,less,styl}]
+# 指定檔案編碼格式（預設推薦 UTF-8）
 charset = utf-8
+# 設定縮排寬度為 2 個空格
 indent_size = 2
+# 設定縮排方式為空格（space），若要用 Tab 可填 tab
 indent_style = space
+# 儲存時在檔案末端自動補上一行空行（符合 POSIX 標準與 Git 規範）
 insert_final_newline = true
+# 儲存時自動刪除行尾多餘的空白字元
 trim_trailing_whitespace = true
 
+# 設定換行符號格式（lf 為 Unix/Linux/macOS 格式，crlf 為 Windows 格式）
 end_of_line = lf
+# 設定單行最大字數限制為 100 個字元（協助程式碼排版與閱讀）
 max_line_length = 100

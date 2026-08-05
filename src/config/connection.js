@@ -53,7 +53,7 @@ const connectDB = async (dbURI, database) => {
 
     console.log(chalk.green(`✅ 已成功連接到資料庫: ${database}`))
     return mongoose
-  } 
+  }
   catch (err) {
     console.error(chalk.red('❌ 資料庫連接錯誤:'), err)
     throw err

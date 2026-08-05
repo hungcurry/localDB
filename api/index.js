@@ -2,7 +2,7 @@
 // import 'dotenv/config' // 確保第一行加載環境變數
 // ~進階方式 根據不同環境NODE_ENV,加載不同的 .env 檔案
 import '../src/config/env/env.js' // 確保第一行加載環境變數
-import app  from '../src/app.js'
+import app from '../src/app.js'
 import http from 'http'
 import mongoose from 'mongoose'
 import { connectDB } from '../src/config/connection.js'
@@ -34,7 +34,8 @@ async function startServer() {
   try {
     await connectDB(mainConfig.uri, mainConfig.dbName)
     isDbConnected = true
-  } catch (err) {
+  }
+  catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error(`❌ 資料庫初始化連線失敗: ${msg}`)
     console.warn('⚠️ 伺服器將以「降級模式」啟動 (無資料庫連線)。')
@@ -45,7 +46,8 @@ async function startServer() {
     try {
       await initDatabases()
       await initSeedsData()
-    } catch (err) {
+    }
+    catch (err) {
       console.error('⚠️ [DB-Seed] 假資料寫入失敗，但伺服器仍繼續啟動:', err)
     }
   }

@@ -57,8 +57,8 @@ const envDbMap = {
 // 從 Entity 解析 Collection 名稱
 function getCollectionName(entity) {
   // prettier-ignore
-  return entity.collectionName 
-  || entity.schema?.get('collection') 
+  return entity.collectionName
+  || entity.schema?.get('collection')
   || entity.name?.replace(/Model$/, '')
 }
 // 針對指定的單一 DB 建立所有對應的 Collections
@@ -76,7 +76,8 @@ async function initCollectionsForDb(dbConfig, entities) {
     try {
       const Model = db.models[entity.name] || db.model(entity.name, schema, collectionName)
       await Model.createCollection()
-    } catch (err) {
+    }
+    catch (err) {
       if (err?.code !== COLLECTION_EXISTS_ERROR) {
         throw err
       }
@@ -101,7 +102,8 @@ const initDatabases = async () => {
   for (const dbConfig of Object.values(envDbMap)) {
     try {
       await initCollectionsForDb(dbConfig, allEntities)
-    } catch (err) {
+    }
+    catch (err) {
       console.error(`❌ 資料庫 [${dbConfig.label} / ${dbConfig.dbName}] 初始化失敗:`, err)
     }
   }
