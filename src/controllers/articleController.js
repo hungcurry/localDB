@@ -1,4 +1,4 @@
-import { getDBArticles } from '../../db/index.js'
+import { getDBArticles } from '../services/index.js'
 // 引入 logger
 import { createLogger } from '../utils/logger.js'
 import { handleError, appError } from '../middlewares/errorHandler.js'

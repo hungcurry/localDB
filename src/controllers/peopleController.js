@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs' // 密碼加密
-import { getDBPeople, postDBPeople } from '../../db/index.js'
+import { getDBPeople, postDBPeople } from '../services/index.js'
 import { utilSendErrorResponse } from '../middlewares/auth.js'
 
 const handleGetPeople = async (req, res, next) => {

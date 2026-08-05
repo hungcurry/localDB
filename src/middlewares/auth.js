@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs' // 密碼加密
 import { v4 as uuidv4 } from 'uuid'
-import { getConfig } from '../config/index.js'
+import { getConfig } from '../config/env/index.js'
 import { signToken, verifyToken } from '../utils/generateJWT.js'
 
 // 用於存儲 token 及其有效期

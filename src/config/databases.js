@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import { getConfig } from '../server/config/index.js'
-import { allEntities } from './models/index.js'
+import { getConfig } from './env/index.js'
+import { allEntities } from '../models/index.js'
 
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
 const isProd = nodeEnv === 'production'

@@ -36,13 +36,14 @@ const envFile =
     dev: '.env.dev'
   }
   02-
-  envFile [process.env.NODE_ENV] 
+  envFile [process.env.NODE_ENV]
 
   03-
   envFile ["dev"] => '.env.dev'
- * 
+ *
  */
 
-dotenv.config({ path: envFile })
+// 加上 env/ 目錄前綴
+dotenv.config({ path: `env/${envFile}` })
 
 console.log(chalk.red(`[Config] 環境變數已載入: ${envFile}`))

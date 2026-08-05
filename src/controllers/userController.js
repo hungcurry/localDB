@@ -91,7 +91,7 @@
 // #endregion
 
 // #region express方式
-import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../db/index.js'
+import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../services/index.js'
 // 引入 logger
 import { createLogger } from '../utils/logger.js'
 import { handleError, appError } from '../middlewares/errorHandler.js'

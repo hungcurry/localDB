@@ -1,4 +1,4 @@
-import { getConfig } from '../config/index.js'
+import { getConfig } from '../config/env/index.js'
 const nodeEnv = getConfig('server.nodeEnv')
 
 /** 1. 自定義錯誤處理 

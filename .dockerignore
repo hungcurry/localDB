@@ -1,0 +1,10 @@
+node_modules/
+.git/
+.env*
+.eslintrc.json
+.github*
+.vscode*
+.cache
+*.md
+test/**
+apidoc.json

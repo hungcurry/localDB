@@ -2,11 +2,11 @@
 import request from 'supertest'
 import express from 'express'
 import bcrypt from 'bcryptjs'
-import { handleGetPeople, handlePostPerson } from '../../server/controllers/peopleController.js'
-import { getDBPeople, postDBPeople } from '../../db/index.js'
+import { handleGetPeople, handlePostPerson } from '../../controllers/peopleController.js'
+import { getDBPeople, postDBPeople } from '../../services/index.js'
 
 // 攔截資料庫零件，不連實體 MongoDB
-jest.mock('../../db/index.js')
+jest.mock('../../services/index.js')
 // 讓它永遠回傳一個固定的假 UUID 字串
 jest.mock('uuid', () => ({
   v4: () => 'mocked-uuid-1111-2222-3333',

@@ -1,30 +1,3 @@
-// #region jest ES6安裝方式
-// ------------------------------
-// 1.npm i -D jest supertest
-// (supertest 就是專門用來做「API 整合測試（Integration Test）」的工具)
-// 2.vscode jest
-// 3.npm install --save-dev babel-jest @babel/preset-env
-// 4. add .babelrc 文件
-// ---
-// {
-//   "presets": ["@babel/preset-env"]
-// }
-// ---
-
-// 5. addpackage.json
-// ---
-// "type": "module",
-// "scripts": {
-//   "test:watch": "jest --watchAll"
-// },
-// ---
-
-// 6. 測試
-// npm run test:watch
-
-// ------------------------------
-// #endregion
-
 // Express API 整合測試 (API Integration Testing)
 import request from 'supertest'
 import express from 'express'
@@ -33,11 +6,11 @@ import {
   handlePostUser,
   handlePutUser,
   handleDeleteUser,
-} from '../../server/controllers/userController.js'
-import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../db/index.js'
+} from '../../controllers/userController.js'
+import { getDBUsers, postDBUser, updateDBUser, deleteDBUser } from '../../services/index.js'
 
 // 模擬資料庫模組，防止實際連接到資料庫
-jest.mock('../../db/index.js')
+jest.mock('../../services/index.js')
 
 const app = express()
 app.use(express.json())

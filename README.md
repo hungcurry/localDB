@@ -1,5 +1,32 @@
+## 專案快速啟動
+
+#### localDB
+
+> 指令
+
+```jsx
+// 🚀 啟動資料庫
+// ---
+// ~GUI
+// MongoDB =>  MongoDB Compass
+// Postgres => DBeaver
+
+// 啟動資料庫（背景執行）
+docker-compose up -d
+
+// 停止資料庫（保留資料）
+docker-compose down
+
+// 重置資料庫（刪volume）
+docker-compose down -v
+
+// 查看目前運行狀態
+docker-compose ps
+```
 
 #### 本機開發
+
+> 檔案修改
 
 ```jsx
 // ===================
@@ -85,6 +112,7 @@ await TenantB_UserModel.create({ name: 'Bob' })   // 寫入 tenantB_db
 #### handleAsyncError 原理
 
 > 原本
+
 ```jsx
 // router/normal.js
 import { someController } from '../controllers/someController.js'
@@ -107,6 +135,7 @@ export { someController }
 ```
 
 > 使用 handleAsyncError後
+
 ```jsx
 // router/normal.js
 import { handleAsyncError } from '../middlewares/errorHandler.js'
@@ -144,6 +173,8 @@ export { someController }
 ```
 
 #### 公司localhost 無法連線 MongoDB原因
+
+> 原因
 
 ```jsx
 // MongoDB 對接口 : TCP 27017

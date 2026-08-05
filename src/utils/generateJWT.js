@@ -1,6 +1,6 @@
 // 安裝指令：npm install jsonwebtoken
 import jwt from 'jsonwebtoken'
-import { getConfig } from '../config/index.js'
+import { getConfig } from '../config/env/index.js'
 
 // 取得環境設定
 // const JWT_SECRET = getConfig('secret.jwtSecret')

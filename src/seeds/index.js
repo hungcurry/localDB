@@ -9,7 +9,7 @@ import {
   ArticleModel,
   // === 父表 (主表) ===
   // === 子表 (從表) ===
-} from '../../db/models/index.js'
+} from '../models/index.js'
 // mock 假資料
 import { mockUsersDev } from './dev/users.seed.js'
 import { mockPeoples } from './dev/peoples.seed.js'

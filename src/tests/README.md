@@ -1,3 +1,32 @@
+#### jest ES6安裝方式
+
+```jsx
+1.npm i -D jest supertest
+(supertest 就是專門用來做「API 整合測試（Integration Test）」的工具)
+
+2.vscode 插劍 jest
+
+3.npm install --save-dev babel-jest @babel/preset-env
+
+4. add .babelrc 文件
+---
+{
+  "presets": ["@babel/preset-env"]
+}
+
+
+5. add package.json
+---
+"type": "module",
+"scripts": {
+  "test:watch": "jest --watchAll"
+},
+
+
+6. 測試
+npm run test:watch
+```
+
 #### 單元測試
 
 ```jsx

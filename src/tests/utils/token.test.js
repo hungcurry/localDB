@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
-import { signToken, verifyToken } from '../../server/utils/generateJWT.js' // 假設你的檔案路徑在此
-import { getConfig } from '../../server/config/index.js'
+import { signToken, verifyToken } from '../../utils/generateJWT.js' // 假設你的檔案路徑在此
+import { getConfig } from '../../config/env/index.js'
 
 // 1️⃣ Mock 掉你的 config 模組，這樣我們才能在測試中自由控制環境變數
-jest.mock('../../server/config/index.js')
+jest.mock('../../config/env/index.js')
 
 describe('測試元件📅-Token簽發與驗證', () => {
   const mockPayload = { userId: 'user123', role: 'admin' }

@@ -20,7 +20,7 @@ import dotenv from 'dotenv'
 // 這邊位置才能抓到，因為這時候才會執行到這裡
 // const { VARIABLES } = process.env
 
-import { getConfig } from '../config/index.js'
+import { getConfig } from '../config/env/index.js'
 const VARIABLES = getConfig('secret.variables')
 const JWT_EXPIRES_DAY = getConfig('secret.jwtExpiresDay')
 
