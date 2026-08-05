@@ -76,7 +76,8 @@ import { dirname, join, resolve } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 // 用現在檔案當起點，往上跳一層，再進 server/views
-const viewsPath = resolve(__dirname, '..', 'server', 'views')
+// const viewsPath = resolve(__dirname, '..', 'server', 'views')
+const viewsPath = resolve(__dirname, 'views')
 // view engine setup
 app.engine('ejs', ejsLocals)
 // 讀取 EJS 檔案位置
@@ -115,7 +116,8 @@ app.use(httpLogger)
 // app.use(express.static(path.join(__dirname, 'public')))
 // ---
 // resolve: 用現在檔案當起點，往上跳一層，再進 server/public
-const publicPath = resolve(__dirname, '..', 'server', 'public')
+// const publicPath = resolve(__dirname, '..', 'server', 'public')
+const publicPath = resolve(__dirname, 'public')
 app.use(express.static(publicPath))
 
 // ===================
@@ -127,7 +129,7 @@ app.use(express.static(publicPath))
 // 這邊新增後,下面Router的路徑也要記得加上去
 // prettier-ignore
 const excludedPaths = [
-  '/', 'index', 'api-docs', 'error', 
+  '/', 'index', 'api-docs', 'error',
   'favicon.ico', '.well-known', 'robots.txt'
 ]
 app.use(async (req, res, next) => {
@@ -192,7 +194,7 @@ app.use(async (req, res, next) => {
     await connectDB(dbURI, finalDatabase)
 
     next()
-  } 
+  }
   catch (err) {
     console.error('Failed to connect to database:', err)
     res.status(500).json({
@@ -246,4 +248,4 @@ app.use(handleNotFound)
 // 使用錯誤處理中間件
 app.use(handleGlobalError)
 
-export default app 
+export default app
