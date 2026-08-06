@@ -2,12 +2,12 @@ import mongoose from 'mongoose'
 // 有顏色 console.log
 import chalk from 'chalk'
 import { getConfig } from './env/index.js'
-import { initDatabases, envDbMap } from './databases.js'
+import { envDbMap } from './databases.js'
 
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
 const isDev = nodeEnv === 'dev'
 const mainConfig = envDbMap[nodeEnv] ?? envDbMap.dev
-// 專注建立資料庫主連線
+// 要連的資料庫
 const DATABASE_NAME = mainConfig.dbName // 預設 devDB
 const DATABASE_URL = mainConfig.uri // 預設 dev連結
 // 是否註冊過
@@ -65,7 +65,16 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
       }
     }
 
-    // 4. 建立/切換至目標資料庫連線
+    // 4. 建立 / 切換至目標資料庫連線
+    // *第一次 npm run dev 建立並會連到 devDB 資料庫
+    /** 重要
+     *  -----------
+     *  mongoose.connect() 連線建立完成的瞬間
+     *  Mongoose 立刻檢查記憶體中被 import 進來並註冊過的 Models（Article、People、User）
+     *  只要檔案內執行了 mongoose.model('Article', articleSchema)
+     *  Mongoose 會自動檢查該 Model 是否存在於 MongoDB。
+     *  若不存在，Mongoose 會在背景執行 createCollection()，強制在資料庫中建立該 Collection。
+    */
     const instance = await mongoose.connect(dbURI, {
       dbName: database,
     })
@@ -75,7 +84,7 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
   }
   catch (err) {
     console.error(chalk.red('❌ 資料庫連接錯誤:'), err)
-    throw err
+    process.exit(1) // 實務專案中，連線失敗通常需中止服務
   }
 }
 

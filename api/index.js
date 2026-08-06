@@ -70,7 +70,7 @@ async function startServer() {
   // 連線成功後，建立種子資料
   if (isDbConnected) {
     try {
-      await initDatabases()
+      // await initDatabases()
       await initSeedsData()
     }
     catch (err) {
