@@ -66,7 +66,7 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
     }
 
     // 4. 建立/切換至目標資料庫連線
-    const instance =await mongoose.connect(dbURI, {
+    const instance = await mongoose.connect(dbURI, {
       dbName: database,
     })
 

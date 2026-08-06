@@ -6,6 +6,15 @@ import path from 'path'
 // 有顏色 console.log
 import chalk from 'chalk'
 import cookieParser from 'cookie-parser'
+// { }
+import { parse } from 'url'
+import { createServer } from 'http'
+import { connectDB } from './config/connection.js'
+import { getConfig } from './config/env/index.js'
+import { httpLogger } from './utils/logger.js'
+import { envDbMap } from './config/databases.js'
+import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from './utils/swagger.js'
+import { handleNotFound, handleGlobalError } from './middlewares/errorHandler.js'
 // Router
 import indexRouter from './routes/index.js'
 import userRouter from './routes/user.js'
@@ -13,16 +22,6 @@ import roomRouter from './routes/room.js'
 import tokenRouter from './routes/token.js'
 import articleRouter from './routes/article.js'
 import errorRouter from './routes/error.js'
-// { }
-import { parse } from 'url'
-import { createServer } from 'http'
-import { connectDB } from './config/connection.js'
-import { getConfig } from './config/env/index.js'
-import { httpLogger } from './utils/logger.js'
-import { wss1, wss2 } from './routes/ws.js'
-import { mongoURIs, defaultDbMap } from './config/databases.js'
-import { swaggerDocs, swaggerUi, SWAGGER_OPTIONS } from './utils/swagger.js'
-import { handleNotFound, handleGlobalError } from './middlewares/errorHandler.js'
 // #endregion
 
 const PORT = getConfig('server.port') || 3000
@@ -38,32 +37,6 @@ const app = express()
 // 先處理跨域 (最優先)
 // 限定只有特定條件的前端才能存取 API
 app.use(cors(corsOptions))
-
-// ===================
-// ... 伺服器 ...
-// ===================
-// ~創建 HTTP 伺服器
-const server = createServer(app)
-// ~創建 WebSocket 伺服器
-server.on('upgrade', function upgrade(request, socket, head) {
-  const { pathname } = parse(request.url)
-
-  switch (pathname) {
-    case '/ws':
-      wss1.handleUpgrade(request, socket, head, function done(ws) {
-        wss1.emit('connection', ws, request)
-      })
-      break
-    case '/ws2':
-      wss2.handleUpgrade(request, socket, head, function done(ws) {
-        wss2.emit('connection', ws, request)
-      })
-      break
-    default:
-      socket.destroy()
-      break
-  }
-})
 
 // ===================
 // ... view模板 ...
@@ -178,11 +151,17 @@ app.use(async (req, res, next) => {
     }
 
     // DB mapping
-    // 防護：若找不到則退回預設環境 (mongoURIs.api2 : dev)
-    const dbURI = mongoURIs[path] || mongoURIs.api2
-    // 得到 mongoURIs.api2 (連線到 dev 伺服器)
-    const defaultDatabase = defaultDbMap[path]
-    // 透過 defaultDbMap["api2"] 得到 "devDB"。
+    const pathToEnvMap = {
+      api: 'production', // prodDB
+      api2: 'dev', // devDB
+      api3: 'test', // testDB
+    }
+    // 防護機制：根據 path 取得對應環境，若找不到則退回預設環境 'dev'
+    const envKey = pathToEnvMap[path] ?? 'dev' // api2 => dev
+    const targetEnv = envDbMap[envKey] // 得到dev物件
+
+    const dbURI = targetEnv.uri // mongoUriDev (連線到 dev 伺服器)
+    const defaultDatabase = targetEnv.dbName // 得到 "devDB"。
 
     // *如果後續沒有定義 例: /products 路由，
     // 它會自然掉進你底部的 404 處理器

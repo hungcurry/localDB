@@ -3,54 +3,41 @@ import { getConfig } from './env/index.js'
 import { allEntities } from '../models/index.js'
 
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
+const mongoUriProd = getConfig('db.mongoUriProd')
+const mongoUriDev = getConfig('db.mongoUriDev')
+const mongoUriTest = getConfig('db.mongoUriTest')
 const isProd = nodeEnv === 'production'
 const isDev = nodeEnv === 'dev'
 const isTest = nodeEnv === 'test'
 
 // 這是 Collection 已存在的錯誤碼
 const COLLECTION_EXISTS_ERROR = 48
-// 資料庫 URI 配置
-const mongoURIs = {
-  // 如果是用專案開環境 不同環境的對應 不同 MongoDB URI 前綴
-  // api: 'mongodb://127.0.0.1:27017/',
-  // api2: 'mongodb://127.0.0.1:27017/',
-  // api3: 'mongodb://127.0.0.1:27017/',
-
-  // api: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
-  // api2: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
-  // api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
-  api: process.env.MONGO_URI_PROD,
-  api2: process.env.MONGO_URI_DEV,
-  api3: process.env.MONGO_URI_TEST,
-}
-// 預設 Database 名稱 Mapping
-const defaultDbMap = {
+// 各環境資料庫配置 Mapping
+const envDbMap = {
   // *開發環境dev
   // api: 'prodDB',
   // api2: 'devDB',
   // api3: 'testDB',
 
-  // 開發環境使用 devDB，其餘環境 (prod / test) 使用 nuxt3-test
-  api: isDev ? 'prodDB' : 'nuxt3-test',
-  api2: isDev ? 'devDB' : 'nuxt3-test',
-  api3: isDev ? 'testDB' : 'nuxt3-test',
-}
-// 各環境資料庫配置 Mapping
-const envDbMap = {
+  // *正式環境prod
+  // api: 'nuxt3-test',
+  // api2: 'nuxt3-test',
+  // api3: 'nuxt3-test',
+
   production: {
-    uri: mongoURIs.api,
-    dbName: defaultDbMap.api,
     label: 'prodDB',
+    uri: mongoUriProd,
+    dbName: isDev ? 'prodDB' : 'nuxt3-test',
   },
   dev: {
-    uri: mongoURIs.api2,
-    dbName: defaultDbMap.api2,
     label: 'devDB',
+    uri: mongoUriDev,
+    dbName: isDev ? 'devDB' : 'nuxt3-test',
   },
   test: {
-    uri: mongoURIs.api3,
-    dbName: defaultDbMap.api3,
     label: 'testDB',
+    uri: mongoUriTest,
+    dbName: isDev ? 'testDB' : 'nuxt3-test',
   },
 }
 // ==========================================
@@ -134,4 +121,4 @@ const initDatabases = async () => {
   }
 }
 
-export { initDatabases, mongoURIs, defaultDbMap, envDbMap }
+export { initDatabases, envDbMap }

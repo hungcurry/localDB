@@ -24,6 +24,23 @@ docker-compose down -v
 docker-compose ps
 ```
 
+> 資料庫差異
+
+```jsx
+// 本地開發
+是使用同 `1個網址` 
+// 'mongodb://127.0.0.1:27017/'
+去對應不同 Database : prodDB / devDB / testDB
+
+// MongoDB Atla
+是使用開3個專案 獲得 `3個網址`
+// api: 'mongodb+srv://ooopp42:<密碼>@<專案prod>.mongodb.net/',
+// api2: 'mongodb+srv://ooopp42:<密碼>@<專案dev>.mongodb.net/',
+// api3: 'mongodb+srv://ooopp42:<密碼>@<專案test>.mongodb.net/',
+
+去對應Database : nuxt3-test
+```
+
 > 檔案順序
 
 ```jsx
@@ -71,9 +88,9 @@ MONGO_URI_TEST=mongodb://127.0.0.1:27017/testDB
 
 
 // ===================
-// api/api.js
+// config/databases.js
 // ===================
-const defaultDatabases = {
+const envDbMap = {
   // 根據不同的 path 選擇對應的 Databases
   // *開發環境dev
   api: 'prodDB',

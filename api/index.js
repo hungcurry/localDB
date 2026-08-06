@@ -4,13 +4,14 @@
 import '../src/config/env/env.js' // 確保第一行加載環境變數
 import app from '../src/app.js'
 import http from 'http'
-import mongoose from 'mongoose'
 import { connectDB } from '../src/config/connection.js'
 import { getConfig } from '../src/config/env/index.js'
-import { initDatabases, envDbMap } from '../src/config/databases.js'
+import { wss1, wss2 } from '../src/routes/ws.js'
+import { initDatabases } from '../src/config/databases.js'
 // seeds資料
 import { seedMockData } from '../src/seeds/index.js'
 
+// 整個系統只有一個 server 實例
 const server = http.createServer(app)
 const PORT = getConfig('server.port') || 3000
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
@@ -18,13 +19,39 @@ const isProd = nodeEnv === 'production'
 const isDev = nodeEnv === 'dev'
 const isTest = nodeEnv === 'test'
 
+function initWebSocket(server) {
+  server.on('upgrade', function upgrade(request, socket, head) {
+    const { pathname } = parse(request.url)
+
+    switch (pathname) {
+      case '/ws':
+        wss1.handleUpgrade(request, socket, head, function done(ws) {
+          wss1.emit('connection', ws, request)
+        })
+        break
+      case '/ws2':
+        wss2.handleUpgrade(request, socket, head, function done(ws) {
+          wss2.emit('connection', ws, request)
+        })
+        break
+      default:
+        socket.destroy()
+        break
+    }
+  })
+}
 async function initSeedsData() {
+  if (!isDev && !isProd && !isTest) return
+
   // 依環境注入不同的 Seed 資料
+  if (isProd) {
+    // await seedProdData()
+  }
   if (isDev) {
     await seedMockData()
   }
-  if (isProd) {
-    // await seedProdData()
+  if (isTest) {
+    // await seedTestData()
   }
 }
 async function startServer() {
@@ -51,7 +78,10 @@ async function startServer() {
     }
   }
 
-  // 啟動 HTTP 伺服器
+  // ~創建 WebSocket 伺服器(務必在 server.listen 前)
+  initWebSocket(server)
+
+  // ~啟動 HTTP 伺服器
   server.listen(PORT, () => {
     console.log('=================================')
     console.log(`🚀 Server running on http://localhost:${PORT}`)
