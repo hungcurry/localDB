@@ -72,6 +72,7 @@ async function startServer() {
     try {
       // ~初始化 多資料庫 與 Collections
       await initDatabases()
+
       // ~寫入 Seed 假資料
       await initSeedsData()
     }

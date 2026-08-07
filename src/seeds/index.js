@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { All_DATABASES, getModelsForDb } from '../config/databases.js'
+import { allDatabases, getModelsForDb } from '../config/databases.js'
 import {
   // 這個是陣列，裡面放所有的 Schema
   allEntities,
@@ -21,7 +21,7 @@ import { mockUsersTest } from './test/users.seed.js'
 import { mockUsersProd } from './prod/users.seed.js'
 
 // 各資料庫對應的 User 假資料映射表
-const USER_SEEDS_MAP = {
+const userSeedsMap = {
   devDB: mockUsersDev,
   testDB: mockUsersTest,
   prodDB: mockUsersProd,
@@ -29,10 +29,20 @@ const USER_SEEDS_MAP = {
 
 // 清空指定資料庫中非保留 (keepEntities) 的資料表
 async function clearDatabaseTables(dbName, modelsMap) {
-  const cleanEntities = allEntities.filter(({ name }) => !keepEntities?.has(name))
+  // * 跟TS版本node-zeabur-mongo１不同 (單資料庫)
+  // * 這邊 allEntities 出來是 藍圖 所以 還要多轉一層變models
+  // 要清空的 Entities : 傳入結構：每個元素是 { name, schema }
+  const cleanEntities = allEntities.filter(({ name }) => !keepEntities.has(name))
+  // cleanEntities的 name [ 'PeopleModel', 'ArticleModel' ]
+  // 要清空的Tables資料表
+  const cleanTables = cleanEntities.map((entity) => {
+    return entity.collectionName
+  })
+  console.log(`cleanTables`, cleanTables)
+  // cleanTables [ 'People', 'Article' ]
 
-  if (cleanEntities.length === 0) {
-    console.log(`[Seeder] [${dbName}] 沒有需要清空的資料表。`)
+  if (cleanTables.length === 0) {
+    console.log('[Seeder] 沒有需要清空的資料表。')
     return
   }
 
@@ -45,29 +55,59 @@ async function clearDatabaseTables(dbName, modelsMap) {
 
   console.log(`  🧹 舊資料已清空 [${dbName}]`)
 }
-// 初始化與寫入 Seed 假資料
+// 初始化所有目標資料庫 (devDB, prodDB, testDB)
 export async function seedMockData() {
   try {
-    console.log('\n🌱 開始 Seeds 目標資料庫 (devDB, prodDB, testDB)...')
+    console.log('')
+    console.log('🌱 開始 Seeds 3 個目標資料庫 (devDB, prodDB, testDB)...')
 
-    for (const dbName of All_DATABASES) {
+    for (const dbName of allDatabases) {
       console.log(`----------------------------------------`)
-      console.log(`📦 正在處理資料庫: [${dbName}]`)
+      console.log(`📦 正在處理資料庫: [${dbName}]`) // devDB
 
-      // 1. 取得該 DB 的 Models 實體 Map
-      const modelsMap = getModelsForDb(dbName)
+      // 取得該 DB 的 Models 實體 Map
+      const modelsMap = getModelsForDb(dbName) // devDB
+      // #region modelsMap 迴圈結果
+      // const modelsMap = getModelsForDb('動態資料庫')
+      // console.log(`modelsMap` , modelsMap)
+      // ----------------------------------------
+      // 📦 正在處理資料庫: [devDB]
+      //   🧹 舊資料已清空
+      // modelsMap {
+      //   UserModel: Model { devDB_UserModel },
+      //   PeopleModel: Model { devDB_PeopleModel },
+      //   ArticleModel: Model { devDB_ArticleModel }
+      // }
 
-      // 2. 清空該 DB 資料
+      // ----------------------------------------
+      // 📦 正在處理資料庫: [prodDB]
+      //   🧹 舊資料已清空
+      // modelsMap {
+      //   UserModel: Model { devDB_UserModel },
+      //   PeopleModel: Model { devDB_PeopleModel },
+      //   ArticleModel: Model { devDB_ArticleModel }
+      // }
+
+      // ----------------------------------------
+      // 📦 正在處理資料庫: [testDB]
+      //   🧹 舊資料已清空
+      // modelsMap {
+      //   UserModel: Model { devDB_UserModel },
+      //   PeopleModel: Model { devDB_PeopleModel },
+      //   ArticleModel: Model { devDB_ArticleModel }
+      // }
+      // #endregion
+
+      // 清空該 DB 資料
       await clearDatabaseTables(dbName, modelsMap)
 
-      const {
-        UserModel,
-        PeopleModel,
-        ArticleModel,
-      } = modelsMap // devDB
-
+      const { UserModel, PeopleModel, ArticleModel } = modelsMap // devDB
+      // ==========================================
+      // 🚀 動態 資料寫入
+      // 動態不同資料庫 載入不同假資料
+      // ==========================================
       // *動態取得當前資料庫對應的 [ XXX ] 假資料
-      const currentMockUsers = USER_SEEDS_MAP[dbName] || []
+      const currentMockUsers = userSeedsMap[dbName] || []
       // 寫入 Users 資料 ( 開發資料會保留 )
       if (currentMockUsers && currentMockUsers.length > 0) {
         const operations = currentMockUsers.map((user) => ({
@@ -82,14 +122,24 @@ export async function seedMockData() {
         console.log(`  └─ 成功寫入 / 更新 User 資料 [${dbName}]`)
       }
 
-      // 4. 寫入 Peoples 共用假資料
-      if (mockPeoples && mockPeoples.length > 0 && PeopleModel) {
+      // ==========================================
+      // 🚀 資料寫入
+      // 共用資料庫 假資料
+      // ==========================================
+      // 寫入 Users 資料
+      // let createdUsers = []
+      // if (currentMockUsers && currentMockUsers.length > 0) {
+      //   createdUsers = await UserModel.insertMany(currentMockUsers)
+      //   console.log(`  └─ 成功寫入 ${createdUsers.length} 筆 User 資料 [${dbName}]`)
+      // }
+
+      // 寫入 Peoples 資料
+      if (mockPeoples && mockPeoples.length > 0) {
         const createdPeoples = await PeopleModel.insertMany(mockPeoples)
         console.log(`  └─ 成功寫入 ${createdPeoples.length} 筆 People 資料 [${dbName}]`)
       }
-
-      // 5. 寫入 Articles 共用假資料
-      if (mockArticles && mockArticles.length > 0 && ArticleModel) {
+      // 寫入 Articles 資料
+      if (mockArticles && mockArticles.length > 0) {
         const createdArticles = await ArticleModel.insertMany(mockArticles)
         console.log(`  └─ 成功寫入 ${createdArticles.length} 筆 Article 資料 [${dbName}]`)
       }

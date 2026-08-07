@@ -45,7 +45,7 @@ docker-compose ps
 
 ```jsx
 // npm run dev
-初始流程: index.js => conn.js  => databases.js
+初始流程: index.js => app.js => conn.js  => databases.js
 
 // 因為走API 會先從 Router(app.js) 觸發
 API流程:  app.js => conn.js => auth.js
