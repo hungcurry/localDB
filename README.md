@@ -159,6 +159,62 @@ await TenantA_UserModel.create({ name: 'Alice' }) // 寫入 tenantA_db
 await TenantB_UserModel.create({ name: 'Bob' })   // 寫入 tenantB_db
 ```
 
+#### 自動建立 collection 測試
+
+> 原理
+
+```jsx
+* 預設情況下，只要透過 mongoose.model('UserModel', userSchema) 註冊模型，
+* Mongoose 就會觸發 autoCreate 機制，向 MongoDB 發送建立集合（Collection）的指令。
+* 因為預設 autoCreate 為 true，所以在第一次使用模型時，Mongoose 會自動建立對應的集合。
+* 除非 主動設定去關閉他 (autoCreate: false)，否則 Mongoose 會自動建立集合。
+* const schema = new mongoose.Schema({ name: String}, { autoCreate: false });
+```
+
+> 測試
+
+```jsx
+* 1. 創一個檔案 test-autoCreate.js
+import mongoose from 'mongoose'
+const schema = new mongoose.Schema(
+  { name: String },
+  {
+    // 指定 collection 名稱
+    collection: 'users333',
+    // 關閉自動建立 Collection 的功能
+    // autoCreate: false
+  }
+)
+
+const User = mongoose.model('User', schema)
+await mongoose.connect('mongodb://127.0.0.1:27017/test')
+console.log('已連線')
+// 明確等待 Mongoose 完成該 Model 的索引與 Collection 建立
+await User.init()
+// 此時再去查詢，就會正確拿到 users 囉！
+const collections = await mongoose.connection.db.listCollections().toArray()
+console.log(collections)
+await mongoose.disconnect()
+
+2. 然後 終端執行
+node test-autoCreate.js
+
+3. 就會秀出
+// 已連線
+// [
+//   {
+//     name: 'users333',
+//     type: 'collection',
+//     options: {},
+//     info: {
+//       readOnly: false,
+//       uuid: new UUID('b44ce6d5-d606-4cf6-9fa1-e4722672f71b')
+//     },
+//     idIndex: { v: 2, key: [Object], name: '_id_' }
+//   }
+// ]
+```
+
 #### handleAsyncError 原理
 
 > 原本

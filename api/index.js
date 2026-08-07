@@ -70,8 +70,10 @@ async function startServer() {
   // 連線成功後，建立種子資料
   if (isDbConnected) {
     try {
-      // await initDatabases()
-      await initSeedsData()
+      // 初始化 多資料庫 與 Collections
+      await initDatabases()
+
+      // await initSeedsData()
     }
     catch (err) {
       console.error('⚠️ [DB-Seed] 假資料寫入失敗，但伺服器仍繼續啟動:', err)

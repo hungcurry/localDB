@@ -68,12 +68,12 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
     // 4. 建立 / 切換至目標資料庫連線
     // *第一次 npm run dev 建立並會連到 devDB 資料庫
     /** 重要
-     *  -----------
-     *  mongoose.connect() 連線建立完成的瞬間
-     *  Mongoose 立刻檢查記憶體中被 import 進來並註冊過的 Models（Article、People、User）
-     *  只要檔案內執行了 mongoose.model('Article', articleSchema)
-     *  Mongoose 會自動檢查該 Model 是否存在於 MongoDB。
-     *  若不存在，Mongoose 會在背景執行 createCollection()，強制在資料庫中建立該 Collection。
+     * -----------
+     * 預設情況下，只要透過 mongoose.model('UserModel', userSchema) 註冊模型，
+     * Mongoose 就會觸發 autoCreate 機制，向 MongoDB 發送建立集合（Collection）的指令。
+     * 因為預設 autoCreate 為 true，所以在第一次使用模型時，Mongoose 會自動建立對應的集合。
+     * 除非 主動設定去關閉他 (autoCreate: false)，否則 Mongoose 會自動建立集合。
+     * const schema = new mongoose.Schema({ name: String}, { autoCreate: false });
     */
     const instance = await mongoose.connect(dbURI, {
       dbName: database,
