@@ -65,7 +65,7 @@ export async function seedMockData() {
       console.log(`----------------------------------------`)
       console.log(`📦 正在處理資料庫: [${dbName}]`) // devDB
 
-      // 取得該 DB 的 Models 實體 Map
+      // 取得或建立 特定 DB 的 Models
       const modelsMap = getModelsForDb(dbName) // devDB
       // #region modelsMap 迴圈結果
       // const modelsMap = getModelsForDb('動態資料庫')
@@ -101,7 +101,16 @@ export async function seedMockData() {
       // 清空該 DB 資料
       await clearDatabaseTables(dbName, modelsMap)
 
-      const { UserModel, PeopleModel, ArticleModel } = modelsMap // devDB
+      // 取得綁定目前 dbName 的 Models
+      // 給我專屬 devDB 的 User Model
+      // const devModels = getModelsForDb('devDB')
+      // await devModels.User.find() // 👉 跑去 devDB 查 User 資料
+      // prettier-ignore
+      const {
+        UserModel,
+        PeopleModel,
+        ArticleModel,
+      } = modelsMap // devDB
       // ==========================================
       // 🚀 動態 資料寫入
       // 動態不同資料庫 載入不同假資料

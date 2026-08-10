@@ -53,11 +53,14 @@ const allDatabases  = isDev
 // #endregion
 const dbConnections = new Map()
 
-// 取得或建立特定 DB 的 Models
+// 取得或建立 特定 DB 的 Models
 function getModelsForDb(dbName) {
   // 取得目前資料庫連線
   const db = initCheckLink(dbName)
 
+  // * 跟TS版本node-zeabur-mongo１不同 (單資料庫)
+  // * 這邊 allEntities 出來是 藍圖 所以 還要多轉一層變models
+  // * 使用創立出來的model,才能去操作資料庫
   const models = {}
   for (const { name, collectionName, schema } of allEntities) {
     // 建立獨立的快取 Key 名稱 (例如 'devDB_UserModel')
