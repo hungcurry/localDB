@@ -6,8 +6,8 @@ import app from '../src/app.js'
 import http from 'http'
 import { connectDB } from '../src/config/connection.js'
 import { getConfig } from '../src/config/env/index.js'
-import { wss1, wss2 } from '../src/routes/ws.js'
 import { initDatabases } from '../src/config/databases.js'
+import { initWebSocket } from '../src/sockets/index.js'
 // seeds資料
 import { seedMockData } from '../src/seeds/index.js'
 
@@ -19,27 +19,6 @@ const isProd = nodeEnv === 'production'
 const isDev = nodeEnv === 'dev'
 const isTest = nodeEnv === 'test'
 
-function initWebSocket(server) {
-  server.on('upgrade', function upgrade(request, socket, head) {
-    const { pathname } = parse(request.url)
-
-    switch (pathname) {
-      case '/ws':
-        wss1.handleUpgrade(request, socket, head, function done(ws) {
-          wss1.emit('connection', ws, request)
-        })
-        break
-      case '/ws2':
-        wss2.handleUpgrade(request, socket, head, function done(ws) {
-          wss2.emit('connection', ws, request)
-        })
-        break
-      default:
-        socket.destroy()
-        break
-    }
-  })
-}
 async function initSeedsData() {
   if (!isDev && !isProd && !isTest) return
 

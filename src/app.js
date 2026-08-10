@@ -7,7 +7,6 @@ import path from 'path'
 import chalk from 'chalk'
 import cookieParser from 'cookie-parser'
 // { }
-import { parse } from 'url'
 import { createServer } from 'http'
 import { connectDB } from './config/connection.js'
 import { getConfig } from './config/env/index.js'

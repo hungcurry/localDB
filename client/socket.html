@@ -15,58 +15,118 @@
 </body>
 
 <script>
-  const host = 'ws://localhost:3000/ws'
+  // WebSocket 是 搭起一座橋，兩邊隨時透過 JSON 事件互相丟東西
+  // #region WebSocket
+  // ~具體流程
+  // ---------------
+  // 01: 前端連線成功
+  // 使用者 A (小明) 打開網頁：
+  // 前端執行 new WebSocket('ws://localhost:3000/ws')
+
+  // 02: 伺服器 on('connection')  Server連線成功
+  //     wss1.clients 裡面增加：[ client_A (UUID: 111) ] (人數：1)
+  // 03: ws 發送訊息 user
+  // 04: client接收訊息
+  // 05: client端發送訊息
+  // 06: 伺服器 接收到訊息
+  // 07: 伺服器 發送給其他人
+  // ---------------
+  // #endregion
+
+  // ===================
+  // ... 流程01: 連線 ...
+  // ===================
+  const baseUrl = 'ws://localhost:3000'
+  const wsUrl = `${baseUrl}/ws`
+  const ws = new WebSocket(wsUrl)
+  const WebSocketInit = () => {
+    // 連線成功
+    ws.onopen = (res) => {
+      console.log('client 連線成功', res)
+    }
+    // // 關閉連線
+    ws.onclose = (res) => {
+      console.log('關閉連線', res)
+    }
+    // // 發生錯誤
+    ws.onerror = (res) => {
+      console.log('發生錯誤', res)
+    }
+  }
+
+  WebSocketInit()
+  // ===================
+  // ... 流程04: 接收訊息 ...
+  // ===================
+  const messages = []
+  // 各別事件的處理
+  const handleInitUser = (data) => {
+    spanUUID.innerHTML = data.uuid
+    console.log(`歡迎來到 ${data.name}，您的 ID: ${data.uuid}`)
+  }
+  //------
+  const handleMessageCreated = (data) => {
+    messages.push(data)
+    const html = messages
+      .map((item) => `<li>${item.content}</li>`)
+      .join('')
+    ulList.innerHTML = html
+  }
+  // 主通道負責分流 (Router 概念)
+  ws.onmessage = (res) => {
+    const data = JSON.parse(res.data)
+    console.log('收到伺服器訊息:', data)
+
+    // 統一使用 action 判斷
+    switch (data.action) {
+      case 'INIT_USER':
+        handleInitUser(data)
+        break
+      case 'CREATED_SUCCESS': {
+        // 這段只有 伺服器 && client.uuid !== msg.uuid 拿掉
+        // 才能看到 因為是 排除訊息發送者本人
+        handleMessageCreated(data)
+        break
+      }
+      default:
+        console.warn('未知的 action:', data.action)
+        break
+    }
+  }
+
+  // ===================
+  // ... 流程05: 發送訊息 ...
+  // ===================
+  // #region CRUD文字
+  // 模擬 Create (新增留言)
+  // { "action": "CREATE_MESSAGES", data }
+
+  // 模擬 Read (請求歷史訊息)
+  // { "action": "GET_MESSAGES", data }
+
+  // 模擬 Update (編輯訊息)
+  // { "action": "UPDATE_MESSAGE", data }
+
+  // 模擬 Delete (刪除留言)
+  // { "action": "DELETE_MESSAGE", data }
+  // #endregion
+  // -----------------
   const inputMessage = document.querySelector('#message')
   const spanUUID = document.querySelector('#uuid')
   const ulList = document.querySelector('#list')
   const btnSend = document.querySelector('#sendBtn')
 
-  // 瀏覽器已經提供了 WebSocket 的實現 所以不須額外引入
-  const ws = new WebSocket(host)
-
-  // 連線成功
-  ws.onopen = (res) => {
-    console.log('client 連線成功', res)
-  }
-  // // 關閉連線
-  ws.onclose = (res) => {
-    console.log('關閉連線', res)
-  }
-  // // 發生錯誤
-  ws.onerror = (res) => {
-    console.log('發生錯誤', res)
-  }
-
-  // 接收伺服器發送的訊息
-  const messages = []
-  ws.onmessage = (res) => {
-    console.log('----------')
-    console.log('回傳訊息', res)
-    const data = JSON.parse(res.data)
-    console.log('data', data)
-
-    if (data.name === 'curry') {
-      spanUUID.innerHTML = data.uuid
-    }
-
-    if (data.context === 'message') {
-      messages.push(data)
-      const html = messages
-        .map((item) => {
-          return `<li>${item.content}</li>`
-        })
-        .join('')
-      ulList.innerHTML = html
-    }
-  }
-
-  // 發送訊息
-  btnSend.addEventListener('click', () => {
+  const handleCrteateMessage = () => {
     const value = inputMessage.value
     // 只能發送字串
-    ws.send(JSON.stringify({ content: value, title: 'message' }))
+    ws.send(JSON.stringify({
+      action: 'CREATE_MESSAGES',
+      content: value,
+    }))
     inputMessage.value = ''
-  })
+  }
+
+  btnSend.addEventListener('click', handleCrteateMessage)
 </script>
 
 </html>
