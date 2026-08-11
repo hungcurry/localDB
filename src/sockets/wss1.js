@@ -54,7 +54,8 @@ const sendAllUser = (msg) => {
         console.log(`推播給其他用戶...XXXX 捐獻${msg.content}元`)
         const jsonMsg = JSON.stringify(msg)
         client.send(jsonMsg)
-      } catch (error) {
+      }
+      catch (error) {
         console.error('訊息發送失敗:', error)
       }
     }
