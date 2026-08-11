@@ -26,7 +26,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.8.1",
+    "mongoose": "^9.9.2",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "pino-roll": "^4.0.0",
@@ -34,10 +34,10 @@
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.1",
-    "ws": "^8.21.1"
+    "ws": "^8.21.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "babel-jest": "^30.4.1",
     "cross-env": "^10.1.0",
