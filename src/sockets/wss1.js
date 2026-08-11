@@ -46,7 +46,7 @@ const sendAllUser = (msg) => {
   wss1.clients.forEach(function (client) {
     // 已建立連線並且排除自身
     // client.readyState === WebSocket.OPEN：確認該 Client 的連線是活著且穩定的
-    // && client.uuid !== msg.uuid ：排除訊息發送者本人
+    // * && client.uuid !== msg.uuid ：排除訊息發送者本人
     // *測試時,要拿掉排除那段 伺服器 和 瀏覽器才能看到訊息
     if (client.readyState === WebSocket.OPEN && client.uuid !== msg.uuid) {
       try {
@@ -54,13 +54,13 @@ const sendAllUser = (msg) => {
         console.log(`推播給其他用戶...XXXX 捐獻${msg.content}元`)
         const jsonMsg = JSON.stringify(msg)
         client.send(jsonMsg)
-      }
-      catch (error) {
+      } catch (error) {
         console.error('訊息發送失敗:', error)
       }
     }
   })
 }
+
 // ===================
 // ... 流程03: 發送訊息 ...
 // ===================
@@ -79,41 +79,47 @@ const handleSendMessage = (ws, uuid) => {
     console.error('初始化訊息發送失敗:', error)
   }
 }
+
 // ===================
 // ... 流程06: 接收訊息 ...
 // ===================
+// 1. 定義各個 action 的處理邏輯
+const actionHandlers = {
+  CREATE_MESSAGES: (ws, msg) => {
+    const newMessage = {
+      action: 'CREATED_SUCCESS',
+      uuid: ws.uuid, // 使用綁定在 ws 上面的 uuid
+      content: msg.content,
+    }
+    // 推播給其他用戶
+    sendAllUser(newMessage)
+  },
+  DELETE_MESSAGES: (ws, msg) => {
+    console.log(`刪除訊息邏輯，UUID: ${ws.uuid}, Target ID: ${msg.messageId}`)
+    // 執行資料庫刪除或廣播邏輯...
+  },
+}
+// 2. 主進入點極簡化
 const handleGetMessage = (ws, rawMessage) => {
   try {
     const msg = JSON.parse(rawMessage)
     console.log('接收 client 訊息:', msg)
     // { action: 'CREATE_MESSAGES', content: '1000' }
 
-    switch (msg.action) {
-      case 'CREATE_MESSAGES': {
-        const newMessage = {
-          action: 'CREATED_SUCCESS',
-          uuid: ws.uuid, // 使用綁定在 ws 上面的 uuid
-          content: msg.content,
-        }
+    const handler = actionHandlers[msg.action]
 
-        // 流程06: 推播給其他用戶
-        sendAllUser(newMessage)
-        break
-      }
-
-      case 'DELETE_MESSAGES':
-        // 刪除邏輯...
-        break
-
-      default:
-        console.warn('未定義的 action:', msg.action)
-        break
+    if (handler) {
+      handler(ws, msg) // 存在就直接執行
+    }
+    else {
+      console.warn('未定義的 action:', msg.action)
     }
   }
   catch (error) {
     console.error('JSON 解析失敗或格式不正確:', error)
   }
 }
+
 // ===================
 // ... 流程02: Server連線成功 ...
 // ===================
@@ -130,11 +136,9 @@ wss1.on('connection', function connection(ws) {
   const uuid = uuidv4()
   ws.uuid = uuid
 
-
   // 流程03: 發送訊息 ...
   // 發出第一個訊息給用戶，表示用戶是誰
   handleSendMessage(ws, uuid)
-
 
   // 流程06: 接收訊息 ...
   // 這個 data 是 ws 套件收到封包後，自動傳給你的
