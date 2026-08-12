@@ -44,11 +44,17 @@ docker-compose ps
 > 檔案順序
 
 ```jsx
+口訣: indexjs 從上到下 先看import的檔案順序
 // npm run dev
-初始流程: index.js => app.js => conn.js  => databases.js
+// console 寫在 (Top-level)
+初始流程:  檔案載入順序 
+databases.js => conn.js => (mid/router/controller) => app.js  => index.js
 
-// 因為走API 會先從 Router(app.js) 觸發
-API流程:  app.js => conn.js => auth.js
+// 走router觸發
+// console 寫在 (Function 內部) 
+// 因為走API 會先從 Router(app.js 的 req 那邊) 觸發
+API流程:  邏輯執行順序
+app.req/函式內 => conn/函式內 => mid/函式內 => controller/函式內
 ```
 
 > 網址
