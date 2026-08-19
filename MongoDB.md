@@ -190,6 +190,7 @@ name: mongodb_Docker
 URL : mongodb://testCurryLee:password1234@localhost:27018/?authSource=admin&replicaSet=rs0&directConnection=true 
 ```
 
+
 ### 什麼時候用 aggregate()
 
 ```jsx
@@ -210,6 +211,7 @@ URL : mongodb://testCurryLee:password1234@localhost:27018/?authSource=admin&repl
 // * 統計與報表情境：一旦涉及 $group（分組）、$avg/$sum（統計）、
 //   或者需要超高效能的複雜跨表運算時，再開闢 Model.aggregate() 來處理。
 ```
+
 
 ### Compass UI聚合功能
 
@@ -361,7 +363,10 @@ db.orders.aggregate([
 ])
 ```
 
-### $unwind 展開物件
+
+### DB語法
+
+#### (一).$unwind 展開物件
 
 > 原理定義
 
@@ -424,7 +429,8 @@ db.collection.aggregate([
 ]
 ```
 
-### $lookup 聯合查詢(JOIN)
+
+#### (二).$lookup 聯合查詢(JOIN)
 
 > 原理定義
 
@@ -621,7 +627,8 @@ db.orders.aggregate([
 ]
 ```
 
-### $group 分組/重新組裝物件資料
+
+#### (三).$group 分組/重新組裝物件資料
 
 > 原理定義
 
@@ -690,7 +697,8 @@ db.employees.aggregate([
 ]
 ```
 
-### $facet 包含多個 結果陣列的物件
+
+#### (四).$facet 包含多個 結果陣列的物件
 
 > 原理定義
 
@@ -818,7 +826,8 @@ db.products.aggregate([
 ]
 ```
 
-### $project 返回的欄位/重新改寫欄位
+
+#### (五).$project 返回的欄位/重新改寫欄位
 
 > 原理定義
 
@@ -978,7 +987,8 @@ db.sales.aggregate([
 ]
 ```
 
-### $facet 和 $group 和 $project 差異
+
+#### (六).$facet 和 $group 和 $project 差異
 
 > 流程使用
 
@@ -1087,7 +1097,10 @@ db.transactions.aggregate([
 ]
 ```
 
+
 ### 簡單範例
+
+#### (一).資料範例
 
 > 原始資料
 
@@ -1180,7 +1193,8 @@ $sort +  $limit: 2:
 ]
 ```
 
-//---------------
+
+#### (二).資料範例
 
 > 原始資料
 
