@@ -102,76 +102,59 @@ app.use(express.static(publicPath))
 // 這邊新增後,下面Router的路徑也要記得加上去
 // prettier-ignore
 const excludedPaths = [
-  '/', 'index', 'api-docs', 'error',
+  'index', 'api-docs', 'error',
   'favicon.ico', '.well-known', 'robots.txt'
 ]
+
+// 連線快取池（避免每次請求重複連線或全域踩踏）
+const dbConnections = {}
+
 app.use(async (req, res, next) => {
   try {
-    /**
-     * 如果是 /	    'index'
-     * /products   'products'
-     * /order/list  'order'
-     * /api2/users  'api2'
-     */
-    const path = req.originalUrl === '/' ? 'index' : req.originalUrl.split('/')[1]
+    // 1. 使用 req.path 排除 Query 參數干擾
+    // 例如: "/api2/users?page=1" -> path 為 "api2"
+    const path = req.path.split('/')[1] || 'index'
 
-    // 如果請求路徑在排除陣列中，跳過資料庫連接邏輯
+    // 2. 排除不需連線的路徑
     if (excludedPaths.includes(path)) {
-      // 如果是 favicon 或 well-known，直接回傳 404 並結束請求
-      // 這樣就不會往下走到你的 "API Not Found" 錯誤處理器
-      if (path === 'favicon.ico' || path === '.well-known' || path === 'robots.txt') {
+      if (['favicon.ico', '.well-known', 'robots.txt'].includes(path)) {
         return res.status(404).end()
       }
-
       return next()
     }
 
-    /**
-     * 如果是 GET：返回一個空物件 {}。因為 GET 請求通常不帶 body，資料應該在 query 中。
-     * 如果不是 GET (例如 POST, PUT, DELETE)：返回 req.body。
-     * 如果 req.body 是 undefined 或 null，則給予一個保底的空物件 {} (透過 || {})。
-     */
-    const { database, collection } = req.method === 'GET' ? {} : req.body || {}
-    // 掛載到 req 上，讓後續的 middleware 或 controller 可以使用
+    // 3. 安全取得 body
+    const { database, collection } = req.method === 'GET' ? {} : (req.body || {})
     req.targetCollection = collection
 
-    // dev log
-    if (isDev) {
-      const referer = req.headers.referer
-      const isServerRequest = !referer || referer.includes(`localhost:${process.env.PORT || 3000}`)
-
-      if (path !== 'favicon.ico') {
-        console.log(chalk.cyan(isServerRequest ? '--- 伺服器請求 ---' : '--- 客戶端請求 ---'))
-        console.log('檔案 : app.js')
-        console.log(`API路徑 : ${path}`) // api2
-        console.log('database =>', database)
-        console.log('collection =>', collection)
-      }
-    }
-
-    // DB mapping
+    // 4. DB mapping
     const pathToEnvMap = {
-      api: 'production', // prodDB
-      api2: 'dev', // devDB
-      api3: 'test', // testDB
+      api: 'production',
+      api2: 'dev',
+      api3: 'test',
     }
-    // 防護機制：根據 path 取得對應環境，若找不到則退回預設環境 'dev'
-    const envKey = pathToEnvMap[path] ?? 'dev' // api2 => dev
-    const targetEnv = envDbMap[envKey] // 得到dev物件
 
-    const dbURI = targetEnv.uri // mongoUriDev (連線到 dev 伺服器)
-    const defaultDatabase = targetEnv.dbName // 得到 "devDB"。
+    const envKey = pathToEnvMap[path] ?? 'dev'
+    const targetEnv = envDbMap?.[envKey] || {}
 
-    // *如果後續沒有定義 例: /products 路由，
-    // 它會自然掉進你底部的 404 處理器
+    const dbURI = targetEnv.uri
+    const defaultDatabase = targetEnv.dbName
+
     if (!dbURI) {
       return next()
     }
 
-    // GET 不強制 database（用 default）
     const finalDatabase = database || defaultDatabase
 
-    await connectDB(dbURI, finalDatabase)
+    // 5. 使用快取連線，避免請求間互相覆蓋全域連線
+    const cacheKey = `${dbURI}/${finalDatabase}`
+    if (!dbConnections[cacheKey]) {
+      // 假設 connectDB 回傳該連線實例 (如 mongoose.createConnection)
+      dbConnections[cacheKey] = await connectDB(dbURI, finalDatabase)
+    }
+
+    // 將當前連線掛載在 req，供後續 Controller 使用
+    req.db = dbConnections[cacheKey]
 
     next()
   }
