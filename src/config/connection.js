@@ -4,6 +4,7 @@ import chalk from 'chalk'
 import { getConfig } from './env/index.js'
 import { envDbMap } from './databases.js'
 
+// 1. 環境變數讀取與預設連線配置
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
 const isDev = nodeEnv === 'dev'
 const mainConfig = envDbMap[nodeEnv] ?? envDbMap.dev
@@ -14,25 +15,33 @@ const DATABASE_URL = mainConfig.uri // 預設 dev連結
 let isEventRegistered = false
 
 /**
- * 建立 / 切換 MongoDB 全域連線
+ * 建立 / 切換 MongoDB 連線
  * @param {string} dbURI - 目標連線字串（預設使用當前環境配置）
  * @param {string} database - 目標資料庫名稱（預設使用當前環境配置）
+ *
+ * 0：已斷線（Disconnected）
+ * 1：已連線（Connected）
+ * 2：連線中（Connecting）
+ * 3：斷線中（Disconnecting）
  */
 const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
   try {
-    // 取得目前連線中的資料庫名稱（未連線時設為 '未知'）
+    // 取得當前連線資料庫名稱（若尚未連線或未完成初始化則為 '未知'）
     const currentDB = mongoose.connection.db?.databaseName || '未知'
 
     /**
-     * 【切換判定核心】
-     * 1. readyState === 0：尚未連線，必須建立連線。
-     * 2. currentDB !== database：目前連線的 DB 與目標 DB 不同，必須重新切換連線。
-     * 3. currentDB === '未知'：連線物件尚未水合完成，確保不會誤跳過連線。
+     * 1. readyState === 0：連線已完全斷開時，必須重新連線。
+     * 2. currentDB !== database：目前連線的資料庫與目標資料庫不同時，必須切換。
+     * 3. mongoose.connection.host !== dbURI：
+     *    - mongoose.connection.host 為純主機域名（如 cluster0.xxx.mongodb.net）
+     *    - dbURI 為完整協定字串（如 mongodb+srv://...）
+     *    - 兩者比對確保不同目標叢集切換時必定觸發重連；在 Vercel 溫啟動環境下
+     *      亦確保能強制跳脫狀態殘留，順利完成資料庫切換。
      */
     const needsNewConnection =
       mongoose.connection.readyState === 0 ||
       currentDB !== database ||
-      currentDB === '未知'
+      mongoose.connection.host !== dbURI
 
     if (isDev) {
       console.log(chalk.cyan('------'))
@@ -41,9 +50,8 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
       console.log(chalk.cyan(`當前連線資料庫 => ${currentDB}`))
     }
 
-    // 當需要建立或切換連線時
     if (needsNewConnection) {
-      // 若目前並非處於完全斷線狀態（1: 連線, 2: 連線中, 3: 斷線中），先徹底切斷舊連線
+      // 若連線中或已連線（狀態非 0），先切斷舊連線再切換
       if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect()
         if (isDev) {
@@ -51,12 +59,12 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
         }
       }
 
-      // 重新建立全域連線至目標資料庫
+      // 建立並等待新連線完成
       await mongoose.connect(dbURI, { dbName: database })
       console.log(chalk.green(`✅ 已連接到資料庫: ${database}`))
     }
 
-    // 斷線與錯誤監聽（全域僅掛載一次）
+    // 監聽斷線事件（僅註冊一次）
     if (!isEventRegistered) {
       mongoose.connection.on('disconnected', () => {
         console.log(chalk.yellow('--- 資料庫連接已斷開 ---'))
@@ -67,7 +75,6 @@ const connectDB = async (dbURI = DATABASE_URL, database = DATABASE_NAME) => {
       isEventRegistered = true
     }
 
-    // 回傳全域 mongoose 實例，確保相容後續 mongoose.model 與 initCollections 操作
     return mongoose
   }
   catch (err) {
