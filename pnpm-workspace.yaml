@@ -1,3 +1,13 @@
+# 新發布的套件至少等待 24 小時後才允許安裝。
+# 降低套件剛被發布後遭到供應鏈攻擊的風險。
+minimumReleaseAge: 1440
+minimumReleaseAgeExcludePrune: true
+
+# ( 發布 未滿24小時 ) 這些套件不要受 minimumReleaseAge 限制，可以直接安裝
+minimumReleaseAgeExclude:
+  - obug@2.2.1
+
+# 禁止指定套件執行 build/install script。
 allowBuilds:
   '@parcel/watcher': true
   '@scarf/scarf': true
