@@ -4,7 +4,6 @@ import chalk from 'chalk'
 import { getConfig } from './env/index.js'
 import { envDbMap } from './databases.js'
 
-// 1. 環境變數讀取與預設連線配置
 const nodeEnv = getConfig('server.nodeEnv') || process.env.NODE_ENV || 'development'
 const isDev = nodeEnv === 'dev'
 const mainConfig = envDbMap[nodeEnv] ?? envDbMap.dev

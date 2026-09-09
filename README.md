@@ -60,9 +60,26 @@ app.req/函式內 => conn/函式內 => mid/函式內 => controller/函式內
 > 網址
 
 ```jsx
+// *專案前端
+deploy-github :  正式GCP專案
+deploy-gcloud :  正式GCP專案(備份測試用)
+// *專案後端
+localDB + MongoDB
+
 // *api
+// ~prod
 http://localhost:3000/api/users
 http://localhost:3000/api/users/get-users
+// ~dev
+http://localhost:3000/api2/users
+// ~test
+http://localhost:3000/api3/users
+
+
+// *Vercel
+https://local-db.vercel.app/api/users
+https://local-db.vercel.app/api2/users
+https://local-db.vercel.app/api3/users
 
 // *查看生成的 API 文檔
 http://localhost:3000/api-docs
@@ -86,6 +103,13 @@ http://localhost:3000
 > 檔案修改
 
 ```jsx
+pnpm : v12.3.4
+node : v24.20.0
+
+// *啟動資料庫 + 開發
+docker compose down -v
+docker compose up -d
+npm run dev 
 // ===================
 // .env-dev
 // ===================
@@ -696,17 +720,15 @@ export { someController }
 
 ```jsx
 // MongoDB 對接口 : TCP 27017
-// pwsh
+// bash
 // 指令: 
-Test-NetConnection cluster0.ncgfx.mongodb.net -Port 27017 
+curl -v telnet://cluster0-shard-00-00.ln162.mongodb.net:27017
 // 結果
-// WARNING: Name resolution of cluster0.ncgfx.mongodb.net failed
-
-// ComputerName   : cluster0.ncgfx.mongodb.net
-// RemoteAddress  : 
-// InterfaceAlias : 
-// SourceAddress  : 
-// PingSucceeded  : False
+// *   Trying 159.143.162.92:27017...
+// * connect to 159.143.162.92 port 27017 failed: Timed out
+// * Failed to connect to cluster0-shard-00-00.ln162.mongodb.net port 27017 after 21053 ms: Couldn't connect to server
+// * Closing connection 0
+// curl: (28) Failed to connect to cluster0-shard-00-00.ln162.mongodb.net port 27017 after 21053 ms: Couldn't connect to server
 
 * // 原因
 👉 公司網路（DNS / 防火牆）把 MongoDB 擋掉了
